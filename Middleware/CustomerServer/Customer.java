@@ -4,6 +4,7 @@
 // -------------------------------
 
 package CustomerServer;
+import Common.*;
 
 public class Customer extends RMItem
 {

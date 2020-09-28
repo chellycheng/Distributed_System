@@ -8,5 +8,5 @@ java.policy: FORCE
 
 FORCE: ;
 
-compile-server-rmi: CarServer/*.java FlightServer/*.java RoomServer/*.java Common/*.java ResourceManager/*.java
-	javac CarServer/*.java FlightServer/*.java RoomServer/*.java Common/*.java ResourceManager/*.java
+compile-server-rmi: CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java Common/*.java ResourceManager/*.java
+	javac CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java Common/*.java ResourceManager/*.java

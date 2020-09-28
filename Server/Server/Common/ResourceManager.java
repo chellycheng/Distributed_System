@@ -5,8 +5,6 @@
 
 package Server.Common;
 
-import FlightServer.Flight;
-import RoomServer.Room;
 import Server.Interface.*;
 
 import java.util.*;
@@ -149,11 +147,11 @@ public class ResourceManager implements IResourceManager
 	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException
 	{
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
-		FlightServer.Flight curObj = (FlightServer.Flight)readData(xid, FlightServer.Flight.getKey(flightNum));
+		Flight curObj = (Flight)readData(xid, Flight.getKey(flightNum));
 		if (curObj == null)
 		{
 			// Doesn't exist yet, add it
-			FlightServer.Flight newObj = new FlightServer.Flight(flightNum, flightSeats, flightPrice);
+			Flight newObj = new Flight(flightNum, flightSeats, flightPrice);
 			writeData(xid, newObj.getKey(), newObj);
 			Trace.info("RM::addFlight(" + xid + ") created new flight " + flightNum + ", seats=" + flightSeats + ", price=$" + flightPrice);
 		}
@@ -203,11 +201,11 @@ public class ResourceManager implements IResourceManager
 	public boolean addRooms(int xid, String location, int count, int price) throws RemoteException
 	{
 		Trace.info("RM::addRooms(" + xid + ", " + location + ", " + count + ", $" + price + ") called");
-		RoomServer.Room curObj = (RoomServer.Room)readData(xid, RoomServer.Room.getKey(location));
+		Room curObj = (Room)readData(xid, Room.getKey(location));
 		if (curObj == null)
 		{
 			// Room location doesn't exist yet, add it
-			RoomServer.Room newObj = new RoomServer.Room(location, count, price);
+			Room newObj = new Room(location, count, price);
 			writeData(xid, newObj.getKey(), newObj);
 			Trace.info("RM::addRooms(" + xid + ") created new room location " + location + ", count=" + count + ", price=$" + price);
 		} else {
