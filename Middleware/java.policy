@@ -1,0 +1,3 @@
+grant codebase "file:/Users/hehuimincheng/Desktop/Courses/COMP512/Template/Middleware/" {
+permission java.security.AllPermission;
+};

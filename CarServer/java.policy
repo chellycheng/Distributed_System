@@ -1,0 +1,3 @@
+grant codebase "file:/Users/hehuimincheng/Desktop/Courses/COMP512/Template/CarServer/" {
+permission java.security.AllPermission;
+};
