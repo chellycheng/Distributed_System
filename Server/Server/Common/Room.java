@@ -14,7 +14,7 @@ public class Room extends ReservableItem
 
 	public String getKey()
 	{
-		return RoomServer.Room.getKey(getLocation());
+		return Room.getKey(getLocation());
 	}
 
 	public static String getKey(String location)

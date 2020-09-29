@@ -42,6 +42,7 @@ public class RMIResourceManager extends ResourceManager
 			try {
 				l_registry = LocateRegistry.createRegistry(1099);
 			} catch (RemoteException e) {
+				System.out.println("Trying to connect to an external registry at port:" + 1099);
 				l_registry = LocateRegistry.getRegistry(1099);
 			}
 			final Registry registry = l_registry;

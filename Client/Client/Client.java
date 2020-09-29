@@ -1,6 +1,6 @@
 package Client;
 
-import Server.Interface.*;
+import MwServer.MwInterface;
 
 import java.util.*;
 import java.io.*;
@@ -11,7 +11,7 @@ import java.rmi.UnmarshalException;
 
 public abstract class Client
 {
-	IResourceManager m_resourceManager = null;
+	MwInterface m_resourceManager = null;
 
 	public Client()
 	{

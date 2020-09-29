@@ -14,7 +14,7 @@ public class Flight extends ReservableItem
 
 	public String getKey()
 	{
-		return FlightServer.Flight.getKey(Integer.parseInt(getLocation()));
+		return Flight.getKey(Integer.parseInt(getLocation()));
 	}
 
 	public static String getKey(int flightNum)

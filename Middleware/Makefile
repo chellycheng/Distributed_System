@@ -1,4 +1,4 @@
-all: java.policy compile-server-rmi
+all: java.policy compile-server-rmi MwInterface.jar
 
 java.policy: FORCE
 	@echo "Creating server java policy"
@@ -8,5 +8,14 @@ java.policy: FORCE
 
 FORCE: ;
 
-compile-server-rmi: CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java Common/*.java ResourceManager/*.java
-	javac CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java Common/*.java ResourceManager/*.java
+MwInterface.jar: MwServer/MwInterface.java
+	@echo "Compiling RMI server interface"
+	javac  MwServer/MwInterface.java
+	jar cvf MwInterface.jar  MwServer/MwInterface.class
+
+compile-server-rmi: CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java MwServer/*.java Common/*.java ResourceManager/*.java
+	javac CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java MwServer/*.java Common/*.java ResourceManager/*.java
+
+clean:
+	rm -f MwInterface.jar
+	rm -f java.policy

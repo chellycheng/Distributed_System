@@ -224,7 +224,7 @@ public class ResourceManager implements IResourceManager
 	// Deletes flight
 	public boolean deleteFlight(int xid, int flightNum) throws RemoteException
 	{
-		return deleteItem(xid, FlightServer.Flight.getKey(flightNum));
+		return deleteItem(xid, Flight.getKey(flightNum));
 	}
 
 	// Delete cars at a location
@@ -236,13 +236,13 @@ public class ResourceManager implements IResourceManager
 	// Delete rooms at a location
 	public boolean deleteRooms(int xid, String location) throws RemoteException
 	{
-		return deleteItem(xid, RoomServer.Room.getKey(location));
+		return deleteItem(xid, Room.getKey(location));
 	}
 
 	// Returns the number of empty seats in this flight
 	public int queryFlight(int xid, int flightNum) throws RemoteException
 	{
-		return queryNum(xid, FlightServer.Flight.getKey(flightNum));
+		return queryNum(xid, Flight.getKey(flightNum));
 	}
 
 	// Returns the number of cars available at a location
@@ -254,13 +254,13 @@ public class ResourceManager implements IResourceManager
 	// Returns the amount of rooms available at a location
 	public int queryRooms(int xid, String location) throws RemoteException
 	{
-		return queryNum(xid, RoomServer.Room.getKey(location));
+		return queryNum(xid, Room.getKey(location));
 	}
 
 	// Returns price of a seat in this flight
 	public int queryFlightPrice(int xid, int flightNum) throws RemoteException
 	{
-		return queryPrice(xid, FlightServer.Flight.getKey(flightNum));
+		return queryPrice(xid, Flight.getKey(flightNum));
 	}
 
 	// Returns price of cars at this location
@@ -272,7 +272,7 @@ public class ResourceManager implements IResourceManager
 	// Returns room price at this location
 	public int queryRoomsPrice(int xid, String location) throws RemoteException
 	{
-		return queryPrice(xid, RoomServer.Room.getKey(location));
+		return queryPrice(xid, Room.getKey(location));
 	}
 
 	public String queryCustomerInfo(int xid, int customerID) throws RemoteException
