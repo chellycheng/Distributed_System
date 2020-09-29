@@ -7,25 +7,92 @@ import CustomerServer.CustomerResourceManager;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Hashtable;
 import java.util.Vector;
+import ResourceManager.*;
 
 
 public class MwImp implements MwInterface {
 
+    private CarResourceManager cm;
+    private FlightResourceManager fm;
+    private RoomResourceManager rm;
+    private CustomerResourceManager ctm;
+    private Hashtable<String, ResourceManager> rms;
+    //constants
+    private final String cm_name = "car_server18";
+    private final String fm_name = "flight_server18";
+    private final String rm_name = "room_server18";
+    private final String ctm_name = "customer_server18";
 
-    private CarResourceManager carManager;
-    private FlightResourceManager flightManager;
-    private RoomResourceManager hotelManager;
-    private CustomerResourceManager customerManager;
 
-    public static void mian(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception{
+        // use case
+        // user need to give the host and port for respectively
+        // car_server, flight_server, room_server
+        if (args.length < 3) {
+            System.out.println("Help: input format [carhost:port] [flighthost:port] [roomhost:port] [port]");
+            return;
+        }
+
+        //collecting network required information
+        String carServer = args[0];
+        String flightServer = args[1];
+        String roomServer = args[2];
+        int port = args.length > 3 ? Integer.parseInt(args[args.length - 1]) : 1018;
+
+        try {
+            // Parse the arguments
+            // Create a new server object and dynamically generate the stub (client proxy)
+            MwImp obj = new MwImp(carServer, flightServer, roomServer);
+            MwInterface proxyObj = (MwInterface) UnicastRemoteObject.exportObject(obj, 0);
+
+            Registry registry;
+            String registry_name = "mw_server18";
+            // Bind the registry
+            try{
+                registry = LocateRegistry.createRegistry(port);
+            }
+            catch (RemoteException e)
+            {
+                System.out.println("Trying to connect to an external registry at port:" + port);
+                registry = LocateRegistry.getRegistry(port);
+            }
+
+            registry.rebind(registry_name, proxyObj);
+            System.out.println("MiddlewareServer with name \" + registry_name + \" is ready at port \" + port +\" \"");
+        } catch (Exception e) {
+            System.err.println("Error: " + e.toString());
+            e.printStackTrace();
+        }
+
+        // Create and install a security manager
+        if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+        }
+    }
+    public MwImp( String cm_host, String fm_name, String rm_name){
+
+
+        Registry
+
 
     }
 
+    private void
+
     @Override
     public boolean addFlight(int var1, int var2, int var3, int var4) throws RemoteException {
-        return false;
+        try{
+
+        }
+        catch{
+
+        }
+        return
     }
 
     @Override

@@ -26,7 +26,7 @@ public class RoomResourceManagerImp implements RoomResourceManager {
         if (args.length == 1) {
             port = Integer.parseInt(args[0]);
         } else if (args.length != 0) {
-            System.err.println("U have not enter any port number");
+            System.err.println("ou have enter any port for the server");
             System.exit(1);
         }
 
@@ -49,8 +49,9 @@ public class RoomResourceManagerImp implements RoomResourceManager {
                 registry = LocateRegistry.getRegistry(port);
             }
             // bind the proxyObject with the registry
-            registry.rebind("room_server18", proxyObj);
-            System.out.println("Room server is ready to work");
+            String registry_name = "room_server18";
+            registry.rebind(registry_name, proxyObj);
+            System.out.println("Room Server with name " + registry_name + " is ready at port " + port);
         } catch (Exception e) {
             System.err.println("Room Server exception: " + e.toString());
             e.printStackTrace();

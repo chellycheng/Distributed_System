@@ -24,7 +24,7 @@ public class FlightResourceManagerImp implements FlightResourceManager {
         if (args.length == 1) {
             port = Integer.parseInt(args[0]);
         } else if (args.length != 0) {
-            System.err.println("U have not enter any port number");
+            System.err.println("You have enter any port for the server");
             System.exit(1);
         }
 
@@ -43,12 +43,13 @@ public class FlightResourceManagerImp implements FlightResourceManager {
             }
             catch (RemoteException e)
             {
-                System.out.println("Trying to connect to an external registry");
+                System.out.println("Trying to connect to an external registry at port:" + port);
                 registry = LocateRegistry.getRegistry(port);
             }
             // bind the proxyObject with the registry
-            registry.rebind("flight_server18", proxyObj);
-            System.out.println("Flight server is ready to work");
+            String registry_name = "flight_server18";
+            registry.rebind(registry_name, proxyObj);
+            System.out.println("FlightServer with name " + registry_name + " is ready at port " + port +" ");
         } catch (Exception e) {
             System.err.println("Flight Server exception: " + e.toString());
             e.printStackTrace();

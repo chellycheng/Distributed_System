@@ -22,7 +22,7 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
         if (args.length == 1) {
             port = Integer.parseInt(args[0]);
         } else if (args.length != 0) {
-            System.err.println("U have not enter any port number");
+            System.err.println("You have enter any port for the server");
             System.exit(1);
         }
 
@@ -41,12 +41,13 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
             }
             catch (RemoteException e)
             {
-                System.out.println("Trying to connect to an external registry");
+                System.out.println("Trying to connect to an external registry at port:\" + port");
                 registry = LocateRegistry.getRegistry(port);
             }
+            String registry_name = "customer_server18";
             // bind the proxyObject with the registry
-            registry.rebind("customer_server18", proxyObj);
-            System.out.println("Customer server is ready to work");
+            registry.rebind(registry_name, proxyObj);
+            System.out.println("CustomerServer with name " + registry_name + " is ready at port " + port);
         } catch (Exception e) {
             System.err.println("Customer Server exception: " + e.toString());
             e.printStackTrace();

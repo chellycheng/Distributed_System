@@ -17,14 +17,15 @@ public class CarResourceManagerImp implements CarResourceManager{
     protected RMHashMap car_data = new RMHashMap();
 
     public static void main(String[] args) {
-        //default port
+        //default port:1018
+
         int port = 1018;
 
         //take in a registry port
         if (args.length == 1) {
             port = Integer.parseInt(args[0]);
         } else if (args.length != 0) {
-            System.err.println("U have not enter any port number");
+            System.err.println("You have enter any port for the server");
             System.exit(1);
         }
 
@@ -35,7 +36,7 @@ public class CarResourceManagerImp implements CarResourceManager{
 
         Registry registry;
         try {
-            // Initialize the CarResourceMangeerImp and its poxy_object
+            // Initialize the CarResourceManagerImp and its poxy_object
             CarResourceManagerImp obj = new CarResourceManagerImp();
             CarResourceManager proxyObj = (CarResourceManager) UnicastRemoteObject.exportObject(obj, 0);
             try{
@@ -43,12 +44,13 @@ public class CarResourceManagerImp implements CarResourceManager{
             }
             catch (RemoteException e)
             {
-                System.out.println("Trying to connect to an external registry");
+                System.out.println("Trying to connect to an external registry at port:" + port);
                 registry = LocateRegistry.getRegistry(port);
             }
             // bind the proxyObject with the registry
-            registry.rebind("car_server18", proxyObj);
-            System.out.println("Car server is ready to work");
+            String registry_name = "car_server18";
+            registry.rebind(registry_name, proxyObj);
+            System.out.println("CarServer with name " + registry_name + " is ready at port " + port);
         } catch (Exception e) {
             System.err.println("Car Server exception: " + e.toString());
             e.printStackTrace();
@@ -206,43 +208,4 @@ public class CarResourceManagerImp implements CarResourceManager{
         Trace.info("RM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
         return value;
     }
-
-    // Reserve an item
-//    protected boolean reserveItem(int xid, int customerID, String key, String location)
-//    {
-//        Trace.info("RM::reserveItem(" + xid + ", customer=" + customerID + ", " + key + ", " + location + ") called" );
-//        // Read customer object if it exists (and read lock it)
-//        Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
-//        if (customer == null)
-//        {
-//            Trace.warn("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ")  failed--customer doesn't exist");
-//            return false;
-//        }
-//
-//        // Check if the item is available
-//        ReservableItem item = (ReservableItem)readData(xid, key);
-//        if (item == null)
-//        {
-//            Trace.warn("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") failed--item doesn't exist");
-//            return false;
-//        }
-//        else if (item.getCount() == 0)
-//        {
-//            Trace.warn("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") failed--No more items");
-//            return false;
-//        }
-//        else
-//        {
-//            customer.reserve(key, location, item.getPrice());
-//            writeData(xid, customer.getKey(), customer);
-//
-//            // Decrease the number of available items in the storage
-//            item.setCount(item.getCount() - 1);
-//            item.setReserved(item.getReserved() + 1);
-//            writeData(xid, item.getKey(), item);
-//
-//            Trace.info("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") succeeded");
-//            return true;
-//        }
-//    }
 }
