@@ -39,13 +39,13 @@ public interface CustomerResourceManager extends ResourceManager{
      *
      * @return Success
      */
-    boolean reserveFlight(int id, int customerID, String key, String location)
+    boolean reserveFlight(int id, int customerID, String key, String location, int price)
             throws RemoteException;
 
-    boolean reserveCar(int id, int customerID, String key, String location)
+    boolean reserveCar(int id, int customerID, String key, String location, int price)
             throws RemoteException;
 
-    boolean reserveRoom(int id, int customerID, String key, String location)
+    boolean reserveRoom(int id, int customerID, String key, String location, int price)
             throws RemoteException;
 
 

@@ -1,6 +1,8 @@
 package CarServer;
 
 import Common.*;
+import FlightServer.Flight;
+
 import java.util.Vector;
 
 import java.rmi.RemoteException;
@@ -107,11 +109,27 @@ public class CarResourceManagerImp implements CarResourceManager{
 
     // Adds car reservation to this customer
     @Override
-    public boolean reserveCar(int xid, int customerID, String location) throws RemoteException
+    public boolean reserveCar(int xid, String location) throws RemoteException
     {
-        Trace.info("Have not implemented");
-        return false;
-        //return reserveItem(xid, customerID, Car.getKey(location), location);
+        String key = Car.getKey(location);
+        Car item = (Car)readData(xid, key);
+        if (item == null)
+        {
+            Trace.warn("RM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
+            return false;
+        }
+        else if (item.getCount() == 0)
+        {
+            Trace.warn("RM::reserveItem(" + xid  + ", " + key + ", " + location + ") failed--No more items");
+            return false;
+        }else{
+            // Decrease the number of available items in the storage
+            item.setCount(item.getCount() - 1);
+            item.setReserved(item.getReserved() + 1);
+            writeData(xid, item.getKey(), item);
+        }
+
+        return true;
     }
 
     // Reserve bundle

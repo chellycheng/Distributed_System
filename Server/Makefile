@@ -17,6 +17,7 @@ compile-server-rmi: Server/RMI/*.java Server/Interface/IResourceManager.java Ser
 	javac Server/RMI/*.java Server/Interface/IResourceManager.java Server/Common/*.java
 
 clean:
+
 	rm -f Server/Interface/*.class Server/Common/*.class Server/RMI/*.class
 	rm -f RMIInterface.jar
 	rm -f java.policy 

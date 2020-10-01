@@ -12,7 +12,7 @@ public interface FlightResourceManager extends ResourceManager{
 
     int queryFlightPrice(int var1, int var2) throws RemoteException;
 
-    boolean reserveFlight(int var1, int var2, int var3) throws RemoteException;
+    boolean reserveFlight(int var1, int var2) throws RemoteException;
 
     boolean bundle(int var1, int var2, Vector<String> var3, String var4, boolean var5, boolean var6) throws RemoteException;
 

@@ -103,9 +103,26 @@ public class RoomResourceManagerImp implements RoomResourceManager {
     }
 
     @Override
-    public boolean reserveRoom(int var1, int var2, String var3) throws RemoteException {
-        Trace.info("Have not implemented");
-        return false;
+    public boolean reserveRoom(int xid, String location) throws RemoteException {
+        String key = Room.getKey(location);
+        Room item = (Room)readData(xid, key);
+        if (item == null)
+        {
+            Trace.warn("RM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
+            return false;
+        }
+        else if (item.getCount() == 0)
+        {
+            Trace.warn("RM::reserveItem(" + xid  + ", " + key + ", " + location + ") failed--No more items");
+            return false;
+        }else{
+            // Decrease the number of available items in the storage
+            item.setCount(item.getCount() - 1);
+            item.setReserved(item.getReserved() + 1);
+            writeData(xid, item.getKey(), item);
+        }
+
+        return true;
     }
 
     @Override

@@ -14,7 +14,7 @@ public interface RoomResourceManager extends ResourceManager{
 
     int queryRoomsPrice(int var1, String var2) throws RemoteException;
 
-    boolean reserveRoom(int var1, int var2, String var3) throws RemoteException;
+    boolean reserveRoom(int var1, String var2) throws RemoteException;
 
     boolean bundle(int var1, int var2, Vector<String> var3, String var4, boolean var5, boolean var6) throws RemoteException;
 

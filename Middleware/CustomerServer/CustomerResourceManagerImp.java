@@ -140,21 +140,21 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
     }
 
     @Override
-    public boolean reserveFlight(int xid, int customerID, String flightkey, String location) throws RemoteException
+    public boolean reserveFlight(int xid, int customerID, String flightkey, String value, int price) throws RemoteException
     {
-        return reserveItem(xid, customerID, flightkey, location);
+        return reserveItem(xid, customerID, flightkey, value, price);
     }
 
     @Override
-    public boolean reserveCar(int xid, int customerID, String carkey, String location) throws RemoteException
+    public boolean reserveCar(int xid, int customerID, String carkey, String location, int price) throws RemoteException
     {
-        return reserveItem(xid, customerID, carkey, location);
+        return reserveItem(xid, customerID, carkey, location, price);
     }
 
     @Override
-    public boolean reserveRoom(int xid, int customerID, String roomkey, String location) throws RemoteException
+    public boolean reserveRoom(int xid, int customerID, String roomkey, String location, int price) throws RemoteException
     {
-        return reserveItem(xid, customerID, roomkey, location);
+        return reserveItem(xid, customerID, roomkey, location, price);
     }
 
     @Override
@@ -250,7 +250,7 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
     }
 
     // Reserve an item
-    protected boolean reserveItem(int xid, int customerID, String key, String location)
+    protected boolean reserveItem(int xid, int customerID, String key, String location, int price)
     {
         Trace.info("RM::reserveItem(" + xid + ", customer=" + customerID + ", " + key + ", " + location + ") called" );
         // Read customer object if it exists (and read lock it)
@@ -261,30 +261,10 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
             return false;
         }
 
-        // Check if the item is available
-        ReservableItem item = (ReservableItem)readData(xid, key);
-        if (item == null)
-        {
-            Trace.warn("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") failed--item doesn't exist");
-            return false;
-        }
-        else if (item.getCount() == 0)
-        {
-            Trace.warn("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") failed--No more items");
-            return false;
-        }
-        else
-        {
-            customer.reserve(key, location, item.getPrice());
-            writeData(xid, customer.getKey(), customer);
+        customer.reserve(key, location, price);
+        writeData(xid, customer.getKey(), customer);
+        Trace.info("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") succeeded");
+        return true;
 
-            // Decrease the number of available items in the storage
-            item.setCount(item.getCount() - 1);
-            item.setReserved(item.getReserved() + 1);
-            writeData(xid, item.getKey(), item);
-
-            Trace.info("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") succeeded");
-            return true;
-        }
     }
 }

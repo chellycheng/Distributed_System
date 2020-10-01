@@ -183,82 +183,248 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean deleteFlight(int var1, int var2) throws RemoteException {
-        return false;
+    public boolean deleteFlight(int xid, int flightNum) throws RemoteException {
+        try{
+            return fm.deleteFlight(xid, flightNum);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to delete flight");
+        }
     }
 
     @Override
-    public boolean deleteCars(int var1, String var2) throws RemoteException {
-        return false;
+    public boolean deleteCars(int xid, String location) throws RemoteException {
+        try{
+            return cm.deleteCars(xid, location);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to delete car");
+        }
     }
 
     @Override
-    public boolean deleteRooms(int var1, String var2) throws RemoteException {
-        return false;
+    public boolean deleteRooms(int xid, String location) throws RemoteException {
+        try{
+            return rm.deleteRooms(xid, location);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to delete room");
+        }
     }
 
     @Override
-    public boolean deleteCustomer(int var1, int var2) throws RemoteException {
-        return false;
+    public boolean deleteCustomer(int xid, int customerID) throws RemoteException {
+        try{
+            return ctm.deleteCustomer(xid, customerID);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to delete customer");
+        }
     }
 
     @Override
-    public int queryFlight(int var1, int var2) throws RemoteException {
-        return 0;
+    public int queryFlight(int xid, int flightNum) throws RemoteException {
+        try{
+            return fm.queryFlight(xid, flightNum);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to query flight");
+        }
     }
 
     @Override
-    public int queryCars(int var1, String var2) throws RemoteException {
-        return 0;
+    public int queryCars(int xid, String location) throws RemoteException {
+        try{
+            return cm.queryCars(xid, location);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to query cars");
+        }
     }
 
     @Override
-    public int queryRooms(int var1, String var2) throws RemoteException {
-        return 0;
+    public int queryRooms(int xid, String location) throws RemoteException {
+        try{
+            return rm.queryRooms(xid, location);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to query rooms");
+        }
     }
 
     @Override
-    public String queryCustomerInfo(int var1, int var2) throws RemoteException {
-        return null;
+    public String queryCustomerInfo(int xid, int customerID) throws RemoteException {
+        try{
+            return ctm.queryCustomerInfo(xid, customerID);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to query customers");
+        }
     }
 
     @Override
-    public int queryFlightPrice(int var1, int var2) throws RemoteException {
-        return 0;
+    public int queryFlightPrice(int xid, int flightNum) throws RemoteException {
+        try{
+            return fm.queryFlightPrice(xid, flightNum);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to query price of flight");
+        }
     }
 
     @Override
-    public int queryCarsPrice(int var1, String var2) throws RemoteException {
-        return 0;
+    public int queryCarsPrice(int xid, String location) throws RemoteException {
+        try{
+            return cm.queryCarsPrice(xid, location);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to query price of car");
+        }
     }
 
     @Override
-    public int queryRoomsPrice(int var1, String var2) throws RemoteException {
-        return 0;
+    public int queryRoomsPrice(int xid, String location) throws RemoteException {
+        try{
+            return rm.queryRoomsPrice(xid, location);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to query price of room");
+        }
     }
 
     @Override
-    public boolean reserveFlight(int var1, int var2, int var3) throws RemoteException {
-        return false;
+    public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException {
+        try{
+            int price = -1;
+            String key = "flight-" + flightNum;
+            key.toLowerCase();
+            try{
+                //if the flight is available
+                if(fm.reserveFlight(xid, flightNum)){
+                    price = fm.queryFlightPrice(xid, flightNum);
+                }
+            }
+            catch(Exception e){
+                throw new RemoteException("Fail to access the info of flight");
+            }
+
+            return ctm.reserveFlight(xid, customerID, key, String.valueOf(flightNum), price);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to reserve for the flight");
+        }
     }
 
     @Override
-    public boolean reserveCar(int var1, int var2, String var3) throws RemoteException {
-        return false;
+    public boolean reserveCar(int xid, int customerID, String location) throws RemoteException {
+        try{
+            int price = -1;
+            String key = "car-" + location;
+            key.toLowerCase();
+            try{
+                //if the flight is available
+                if(cm.reserveCar(xid, location)){
+                    price = cm.queryCarsPrice(xid, location);
+                }
+            }
+            catch(Exception e){
+                throw new RemoteException("Fail to access the info of car");
+            }
+
+            return ctm.reserveCar(xid, customerID, key, location, price);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to reserve for the car");
+        }
     }
 
     @Override
-    public boolean reserveRoom(int var1, int var2, String var3) throws RemoteException {
-        return false;
+    public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException {
+        try{
+            int price = -1;
+            String key = "room-" + location;
+            key.toLowerCase();
+            try{
+                //if the flight is available
+                if(rm.reserveRoom(xid, location)){
+                    price = rm.queryRoomsPrice(xid, location);
+                }
+            }
+            catch(Exception e){
+                throw new RemoteException("Fail to access the info of room");
+            }
+
+            return ctm.reserveCar(xid, customerID, key, location, price);
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to reserve for the room");
+        }
     }
 
     @Override
-    public boolean bundle(int var1, int var2, Vector<String> var3, String var4, boolean var5, boolean var6) throws RemoteException {
-        return false;
+    public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException {
+        boolean room_success = false;
+        boolean car_success = false;
+        boolean flight_success = false;
+        try {
+            try {
+                String room_key = "room-" + location;
+                room_key.toLowerCase();
+                if (room && rm.reserveRoom(xid, location)) {
+                    int room_price = rm.queryRoomsPrice(xid, location);
+                    ctm.reserveRoom(xid, customerId, room_key, location, room_price);
+                    Trace.info(xid+" Reserve for the room at " + location + " for " + customerId);
+                    room_success = true;
+                } else if (!room) {
+                    room_success = true;
+                }
+
+            } catch (Exception e) {
+                throw new RemoteException(xid + " Fail to reserve for the room at " + location + " for " + customerId);
+            }
+
+            try {
+                String car_key = "car-" + location;
+                car_key.toLowerCase();
+                if (car && cm.reserveCar(xid, location)) {
+                    int car_price = cm.queryCarsPrice(xid, location);
+                    ctm.reserveCar(xid, customerId, car_key, location, car_price);
+                    Trace.info(xid+" Reserve for the car at " + location + " for " + customerId);
+                    car_success = true;
+
+                } else if (!car) {
+                    car_success = true;
+                }
+            } catch (Exception e) {
+                throw new RemoteException(xid + " Fail to reserve for the car at " + location + " for " + customerId);
+            }
+            try {
+                String flight_key = "flight-" + location;
+                flight_key.toLowerCase();
+                for (String flightnumstring : flightNumbers) {
+                    int flightNum = Integer.parseInt(flightnumstring);
+                    if (reserveFlight(xid, customerId, flightNum)) {
+                        int flight_price = fm.queryFlightPrice(xid,flightNum);
+                        ctm.reserveFlight(xid, customerId, flight_key, flightnumstring, flight_price);
+                        Trace.info(xid+" Reserve for the flight " + flightnumstring + " for " + customerId);
+
+                    }
+                }
+                flight_success = true;
+            } catch (Exception e) {
+                throw new RemoteException(xid + " Fail to reserve for the car at " + location + " for " + customerId);
+            }
+
+            return car_success && room_success && flight_success;
+
+        }
+        catch (Exception e){
+            throw new RemoteException("Fail to reserve for the flight");
+        }
     }
 
     @Override
     public String getName() throws RemoteException {
-        return null;
+        return "group_18_" + s_serverName;
     }
 }
