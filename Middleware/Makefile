@@ -1,4 +1,4 @@
-all: java.policy clean
+all: java.policy compile-server-rmi MwInterface.jar
 
 java.policy: FORCE
 	@echo "Creating server java policy"
