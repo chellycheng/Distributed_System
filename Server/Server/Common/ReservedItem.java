@@ -5,6 +5,8 @@
 
 package Server.Common;
 
+import TCPServer.Common.RMItem;
+
 // Represents a customer's "reserved item" (e.g. Flight, Car, or Room)
 // NOTE: if a customer reserves more than one item of the same kind, this is stored as a single
 // instance of ReservedItem reflecting the *latest price*

@@ -5,10 +5,12 @@
 
 package Server.Common;
 
+import TCPServer.Common.RMItem;
+
 import java.util.*;
 
 // A specialization of HashMap with some extra diagnostics
-public class RMHashMap extends HashMap<String, RMItem>
+public class RMHashMap extends HashMap<String, TCPServer.Common.RMItem>
 {
 	public RMHashMap() {
 		super();
@@ -33,7 +35,7 @@ public class RMHashMap extends HashMap<String, RMItem>
 
 	public Object clone()
 	{
-		RMHashMap obj = new RMHashMap();
+		TCPServer.Common.RMHashMap obj = new TCPServer.Common.RMHashMap();
 		for (String key : keySet())
 		{
 			obj.put(key, (RMItem)get(key).clone());

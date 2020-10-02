@@ -26,10 +26,10 @@ public class Trace
 		String s = Thread.currentThread().getName();
 
 		// Shorten
-		// 	"RMI TCP Connection(x)-hostname/99.99.99.99"
+		// 	"RMI Server.TCP Connection(x)-hostname/99.99.99.99"
 		// to
-		// 	"RMI TCP Cx(x)"
-		if(s.startsWith("RMI TCP Connection("))
+		// 	"RMI Server.TCP Cx(x)"
+		if(s.startsWith("RMI Server.TCP Connection("))
 		{
 			return "RMI Cx" +  s.substring(s.indexOf('('), s.indexOf(')')) + ")";
 		}

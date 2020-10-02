@@ -5,6 +5,8 @@
 
 package Server.Common;
 
+import TCPServer.Common.ReservableItem;
+
 public class Flight extends ReservableItem
 {
 	public Flight(int flightNum, int flightSeats, int flightPrice)
@@ -14,7 +16,7 @@ public class Flight extends ReservableItem
 
 	public String getKey()
 	{
-		return Flight.getKey(Integer.parseInt(getLocation()));
+		return TCPServer.Common.Flight.getKey(Integer.parseInt(getLocation()));
 	}
 
 	public static String getKey(int flightNum)

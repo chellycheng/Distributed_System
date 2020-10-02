@@ -5,6 +5,8 @@
 
 package Server.Common;
 
+import TCPServer.Common.RMItem;
+
 import java.io.*;
 
 // Superclass for the three reservable items: Flight, Car, and Room
@@ -69,7 +71,7 @@ public abstract class ReservableItem extends RMItem implements Serializable
 
 	public Object clone()
 	{
-		ReservableItem obj = (ReservableItem)super.clone();
+		TCPServer.Common.ReservableItem obj = (TCPServer.Common.ReservableItem)super.clone();
 		obj.m_location = m_location;
 		obj.m_nCount = m_nCount;
 		obj.m_nPrice = m_nPrice;
