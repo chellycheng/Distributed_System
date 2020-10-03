@@ -1,3 +1,3 @@
-grant codebase "file:/Users/hehuimincheng/Desktop/Courses/COMP512/Template/Server/" {
+grant codebase "file:/home/davidyc/IdeaProjects/Distributed_System/Server/" {
 permission java.security.AllPermission;
 };

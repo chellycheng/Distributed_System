@@ -10,6 +10,12 @@
       <sourceFolder url="file://$MODULE_DIR$/Middleware" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CustomerServer" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/RoomServer" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPpart" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/123/TCPMiddleware" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/123/TCPClient" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCP" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPServer" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPClient" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/CarServer" />
       <excludeFolder url="file://$MODULE_DIR$/Report" />
     </content>

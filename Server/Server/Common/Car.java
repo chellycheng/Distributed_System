@@ -5,6 +5,8 @@
 
 package Server.Common;
 
+import TCPServer.Common.ReservableItem;
+
 public class Car extends ReservableItem
 {
 	public Car(String location, int count, int price)
@@ -14,7 +16,7 @@ public class Car extends ReservableItem
 
 	public String getKey()
 	{
-		return Car.getKey(getLocation());
+		return TCPServer.Common.Car.getKey(getLocation());
 	}
 
 	public static String getKey(String location)

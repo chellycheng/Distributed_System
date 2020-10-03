@@ -5,17 +5,19 @@
 
 package Server.Common;
 
-import java.util.*;
+import TCPServer.Common.RMHashMap;
+import TCPServer.Common.RMItem;
+import TCPServer.Common.ReservedItem;
 
 public class Customer extends RMItem
 {
 	private int m_ID;
-	private RMHashMap m_reservations;
+	private TCPServer.Common.RMHashMap m_reservations;
 
 	public Customer(int id)
 	{
 		super();
-		m_reservations = new RMHashMap();
+		m_reservations = new TCPServer.Common.RMHashMap();
 		m_ID = id;
 	}
 
@@ -31,11 +33,11 @@ public class Customer extends RMItem
 
 	public void reserve(String key, String location, int price)
 	{
-		ReservedItem reservedItem = getReservedItem(key);
+		TCPServer.Common.ReservedItem reservedItem = getReservedItem(key);
 		if (reservedItem == null)
 		{
 			// Customer doesn't already have a reservation for this resource, so create a new one now
-			reservedItem = new ReservedItem(key, location, 1, price);
+			reservedItem = new TCPServer.Common.ReservedItem(key, location, 1, price);
 		}
 		else
 		{
@@ -46,9 +48,9 @@ public class Customer extends RMItem
 		m_reservations.put(reservedItem.getKey(), reservedItem);
 	}
 
-	public ReservedItem getReservedItem(String key)
+	public TCPServer.Common.ReservedItem getReservedItem(String key)
 	{
-		return (ReservedItem)m_reservations.get(key);
+		return (TCPServer.Common.ReservedItem)m_reservations.get(key);
 	}
 
 	public String getBill()
@@ -56,7 +58,7 @@ public class Customer extends RMItem
 		String s = "Bill for customer " + m_ID + "\n";
 		for (String key : m_reservations.keySet())
 		{
-			ReservedItem item = (ReservedItem) m_reservations.get(key);
+			TCPServer.Common.ReservedItem item = (ReservedItem) m_reservations.get(key);
 			s += + item.getCount() + " " + item.getReservableItemKey() + " $" + item.getPrice() + "\n";
 		}
 		return s;
@@ -78,17 +80,17 @@ public class Customer extends RMItem
 
 	public String getKey()
 	{
-		return Customer.getKey(getID());
+		return TCPServer.Common.Customer.getKey(getID());
 	}
 
-	public RMHashMap getReservations()
+	public TCPServer.Common.RMHashMap getReservations()
 	{
 		return m_reservations;
 	}
 
 	public Object clone()
 	{
-		Customer obj = (Customer)super.clone();
+		TCPServer.Common.Customer obj = (TCPServer.Common.Customer)super.clone();
 		obj.m_ID = m_ID;
 		obj.m_reservations = (RMHashMap)m_reservations.clone();
 		return obj;
