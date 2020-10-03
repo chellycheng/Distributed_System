@@ -37,28 +37,26 @@ public class MwImp implements MwInterface {
         // use case
         // user need to give the host and port for respectively
         // car_server, flight_server, room_server
-//        if (args.length < 3) {
-//            System.out.println("Help: input format [carhost:port] [flighthost:port] [roomhost:port] [port]");
-//            return;
-//        }
+        if (args.length < 3) {
+            System.out.println("Help: input format [carhost:port] [flighthost:port] [roomhost:port] [port]");
+            return;
+        }
 
         //collecting network required information
-//        String carServer = args[0];
-//        String flightServer = args[1];
-//        String roomServer = args[2];
-//        int port = args.length > 3 ? Integer.parseInt(args[3]) : 1018;
-        int port = args.length > 3 ? Integer.parseInt(args[0]) : 1018;
+        String carServer = args[0];
+        String flightServer = args[1];
+        String roomServer = args[2];
+        int port = args.length > 3 ? Integer.parseInt(args[3]) : 1018;
 
         try {
-            // Parse the arguments
+
             // Create a new server object and dynamically generate the stub (client proxy)
-//            MwImp obj = new MwImp(carServer, flightServer, roomServer);
-            //testing purpose
-            MwImp obj = new MwImp();
+            MwImp obj = new MwImp(carServer, flightServer, roomServer);
             MwInterface proxyObj = (MwInterface) UnicastRemoteObject.exportObject(obj, 0);
 
             Registry registry;
             String registry_name = "group_18_" + s_serverName;
+
             // Bind the registry
             try{
                 registry = LocateRegistry.createRegistry(port);
@@ -68,9 +66,9 @@ public class MwImp implements MwInterface {
                 registry = LocateRegistry.getRegistry(port);
                 System.out.println("Trying to connect to an external registry at port:" + port);
             }
-
             registry.rebind(registry_name, proxyObj);
             System.out.println("MiddlewareServer with name " + registry_name + " is ready at port " + port );
+
         } catch (Exception e) {
             System.err.println("Error: " + e.toString());
             e.printStackTrace();
@@ -121,9 +119,10 @@ public class MwImp implements MwInterface {
             rm = (ResourceManager) registry.lookup(bind_name);
 
             //why?
-            rms.put(rm.getClass().getInterfaces()[0].getName(), rm);
+            // rms.put(rm.getClass().getInterfaces()[0].getName(), rm);
 
         } catch (Exception e) {
+            e.printStackTrace();
             Trace.info("Unable to connect to RM " + bind_name +" with address" + address);
             System.exit(0);
         }

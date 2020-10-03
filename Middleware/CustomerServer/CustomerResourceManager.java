@@ -48,7 +48,6 @@ public interface CustomerResourceManager extends ResourceManager{
     boolean reserveRoom(int id, int customerID, String key, String location, int price)
             throws RemoteException;
 
-
     boolean bundle(int id, int customerID, Vector<String> flightNumbers, String location, boolean car, boolean room)
             throws RemoteException;
 

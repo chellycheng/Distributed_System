@@ -21,9 +21,6 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
         //take in a registry port
         if (args.length == 1) {
             port = Integer.parseInt(args[0]);
-        } else if (args.length != 0) {
-            System.err.println("You have enter any port for the server");
-            System.exit(1);
         }
 
         // Create and install a security manager
@@ -221,33 +218,6 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
         }
     }
 
-    // Query the number of available seats/rooms/cars
-    protected int queryNum(int xid, String key)
-    {
-        Trace.info("RM::queryNum(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        int value = 0;
-        if (curObj != null)
-        {
-            value = curObj.getCount();
-        }
-        Trace.info("RM::queryNum(" + xid + ", " + key + ") returns count=" + value);
-        return value;
-    }
-
-    // Query the price of an item
-    protected int queryPrice(int xid, String key)
-    {
-        Trace.info("RM::queryPrice(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        int value = 0;
-        if (curObj != null)
-        {
-            value = curObj.getPrice();
-        }
-        Trace.info("RM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
-        return value;
-    }
 
     // Reserve an item
     protected boolean reserveItem(int xid, int customerID, String key, String location, int price)

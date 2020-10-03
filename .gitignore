@@ -4,3 +4,6 @@
 
 # Package
 *.jar
+
+# policy files
+*.policy

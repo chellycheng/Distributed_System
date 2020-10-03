@@ -23,9 +23,6 @@ public class FlightResourceManagerImp implements FlightResourceManager {
         //take in a registry port
         if (args.length == 1) {
             port = Integer.parseInt(args[0]);
-        } else if (args.length != 0) {
-            System.err.println("You have enter any port for the server");
-            System.exit(1);
         }
 
         // Create and install a security manager
