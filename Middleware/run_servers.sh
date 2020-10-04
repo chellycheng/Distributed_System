@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 #TODO: SPECIFY THE HOSTNAMES OF 4 CS MACHINES (lab2--8, lab2-10, etc...)
-MACHINES=(hcheng35@teach-vw1, hcheng35@teach-vw2, hcheng35@teach-vw3, hcheng35@teach-vw4)
+MACHINES=(teach-vw1 teach-vw2 teach-vw3 teach-vw4)
 #MACHINES=(hcheng35@mimi.cs.mcgill.ca, hcheng35@mimi.cs.mcgill.ca, hcheng35@mimi.cs.mcgill.ca, hcheng35@mimi.cs.mcgill.ca)
 tmux new-session \; \
 	split-window -h \; \
@@ -9,9 +9,9 @@ tmux new-session \; \
 	split-window -v \; \
 	select-layout main-vertical \; \
 	select-pane -t 1 \; \
-	send-keys "ssh -t ${MACHINES[0]} \"cd $(pwd) > /dev/null; echo -n 'Connected to '; FlightServer; ./run_flightserver.sh Flights\"" C-m \; \
+	send-keys "ssh -t ${MACHINES[0]} \"cd $(pwd) > /dev/null; echo -n 'Connected to '; FlightServer; ./run_flightserver.sh\"" C-m \; \
 	select-pane -t 2 \; \
-	send-keys "ssh -t ${MACHINES[1]} \"cd $(pwd) > /dev/null; echo -n 'Connected to '; RoomServer; ./run_roomserver.sh Cars\"" C-m \; \
+	send-keys "ssh -t ${MACHINES[1]} \"cd $(pwd) > /dev/null; echo -n 'Connected to '; RoomServer; ./run_roomserver.sh\"" C-m \; \
 	select-pane -t 3 \; \
 	send-keys "ssh -t ${MACHINES[2]} \"cd $(pwd) > /dev/null; echo -n 'Connected to '; CarServer; ./run_carserver.sh\"" C-m \; \
 	select-pane -t 0 \; \
