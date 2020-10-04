@@ -43,9 +43,9 @@ public class MwImp implements MwInterface {
 
         //collecting network required information
         int port = args.length > 3 ? Integer.parseInt(args[3]) : 1018;
-        String carServer = args[0]+""+port;
-        String flightServer = args[1]+""+port;
-        String roomServer = args[2]+""+port;
+        String carServer = args[0]+":"+port;
+        String flightServer = args[1]+":"+port;
+        String roomServer = args[2]+":"+port;
 
         try {
 
