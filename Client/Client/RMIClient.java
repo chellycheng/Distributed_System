@@ -13,8 +13,8 @@ import java.io.*;
 public class RMIClient extends Client
 {
 	private static String s_serverHost = "localhost";
-	private static int s_serverPort = 1048;
-	private static String s_serverName = "Server";
+	private static int s_serverPort = 1018;
+	private static String s_serverName = "MwServer";
 
 	private static String s_rmiPrefix = "group_18_";
 

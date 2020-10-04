@@ -1,4 +1,4 @@
-all: java.policy compile-client
+all: java.policy compile-test
 
 java.policy: FORCE
 	@echo "Creating client java policy"
