@@ -18,8 +18,10 @@
       <sourceFolder url="file://$MODULE_DIR$/TCPClient" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/CarServer" />
       <excludeFolder url="file://$MODULE_DIR$/Report" />
+      <excludeFolder url="file://$MODULE_DIR$/Server" />
+      <excludeFolder url="file://$MODULE_DIR$/TCPServer" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="11" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="RMIInterface" level="project" />
   </component>

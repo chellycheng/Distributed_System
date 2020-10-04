@@ -60,14 +60,14 @@ public class CarResourceManagerImp implements CarResourceManager{
     @Override
     public boolean addCars(int xid, String location, int count, int price) throws RemoteException
     {
-        Trace.info("RM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ") called");
+        Trace.info("CarRM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ") called");
         Car curObj = (Car)readData(xid, Car.getKey(location));
         if (curObj == null)
         {
             // Car location doesn't exist yet, add it
             Car newObj = new Car(location, count, price);
             writeData(xid, newObj.getKey(), newObj);
-            Trace.info("RM::addCars(" + xid + ") created new location " + location + ", count=" + count + ", price=$" + price);
+            Trace.info("CarRM::addCars(" + xid + ") created new location " + location + ", count=" + count + ", price=$" + price);
         }
         else
         {
@@ -78,7 +78,7 @@ public class CarResourceManagerImp implements CarResourceManager{
                 curObj.setPrice(price);
             }
             writeData(xid, curObj.getKey(), curObj);
-            Trace.info("RM::addCars(" + xid + ") modified existing location " + location + ", count=" + curObj.getCount() + ", price=$" + price);
+            Trace.info("CarRM::addCars(" + xid + ") modified existing location " + location + ", count=" + curObj.getCount() + ", price=$" + price);
         }
         return true;
     }
@@ -87,6 +87,7 @@ public class CarResourceManagerImp implements CarResourceManager{
     @Override
     public boolean deleteCars(int xid, String location) throws RemoteException
     {
+        Trace.info("CarRM::deleteCars(" + xid + ") delete a car " + location);
         return deleteItem(xid, Car.getKey(location));
     }
 
@@ -94,6 +95,7 @@ public class CarResourceManagerImp implements CarResourceManager{
     @Override
     public int queryCars(int xid, String location) throws RemoteException
     {
+        Trace.info("CarRM::queryCars(" + xid + ") query a car " + location);
         return queryNum(xid, Car.getKey(location));
     }
 
@@ -101,7 +103,24 @@ public class CarResourceManagerImp implements CarResourceManager{
     @Override
     public int queryCarsPrice(int xid, String location) throws RemoteException
     {
+        Trace.info("CarRM::queryCarsPrice(" + xid + ") query a car price" + location);
         return queryPrice(xid, Car.getKey(location));
+    }
+
+    @Override
+    public boolean reserve_check(int xid, String location) throws RemoteException {
+        String key = Car.getKey(location);
+        Car item = (Car)readData(xid, key);
+        if (item == null)
+        {
+            Trace.warn("CarRM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
+            return false;
+        }
+        else if (item.getCount() == 0) {
+            Trace.warn("CarRM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--No more items");
+            return false;
+        }
+        return true;
     }
 
     // Adds car reservation to this customer
@@ -112,12 +131,12 @@ public class CarResourceManagerImp implements CarResourceManager{
         Car item = (Car)readData(xid, key);
         if (item == null)
         {
-            Trace.warn("RM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
+            Trace.warn("CarRM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
             return false;
         }
         else if (item.getCount() == 0)
         {
-            Trace.warn("RM::reserveItem(" + xid  + ", " + key + ", " + location + ") failed--No more items");
+            Trace.warn("CarRM::reserveItem(" + xid  + ", " + key + ", " + location + ") failed--No more items");
             return false;
         }else{
             // Decrease the number of available items in the storage
@@ -129,12 +148,6 @@ public class CarResourceManagerImp implements CarResourceManager{
         return true;
     }
 
-    // Reserve bundle
-    @Override
-    public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException
-    {
-        return false;
-    }
 
     @Override
     public String getName() throws RemoteException
@@ -172,12 +185,12 @@ public class CarResourceManagerImp implements CarResourceManager{
     // Deletes the encar item
     protected boolean deleteItem(int xid, String key)
     {
-        Trace.info("RM::deleteItem(" + xid + ", " + key + ") called");
+        Trace.info("CarRM::deleteItem(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         // Check if there is such an item in the storage
         if (curObj == null)
         {
-            Trace.warn("RM::deleteItem(" + xid + ", " + key + ") failed--item doesn't exist");
+            Trace.warn("CarRM::deleteItem(" + xid + ", " + key + ") failed--item doesn't exist");
             return false;
         }
         else
@@ -185,42 +198,60 @@ public class CarResourceManagerImp implements CarResourceManager{
             if (curObj.getReserved() == 0)
             {
                 removeData(xid, curObj.getKey());
-                Trace.info("RM::deleteItem(" + xid + ", " + key + ") item deleted");
+                Trace.info("CarRM::deleteItem(" + xid + ", " + key + ") item deleted");
                 return true;
             }
             else
             {
-                Trace.info("RM::deleteItem(" + xid + ", " + key + ") item can't be deleted because some customers have reserved it");
+                Trace.info("CarRM::deleteItem(" + xid + ", " + key + ") item can't be deleted because some customers have reserved it");
                 return false;
             }
         }
     }
 
+    @Override
+    public boolean reserve_cancel(int xid, int customerID, int count, String location) throws RemoteException {
+
+        try {
+            Trace.info("CarRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + location + " " + count + " times");
+            Car item = (Car) readData(xid, location);
+            Trace.info("CarRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + location + " which is reserved " + item.getReserved() + " times and is still available " + item.getCount() + " times");
+            item.setReserved(item.getReserved() - count);
+            item.setCount(item.getCount() + count);
+            writeData(xid, item.getKey(), item);
+            return true;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            Trace.info("CarRM::reserve_cancel(" + xid + ", Error when process" + customerID + ") with reservations on " + location );
+            return false;
+        }
+    }
     // Query the number of available seats/rooms/cars
     protected int queryNum(int xid, String key)
     {
-        Trace.info("RM::queryNum(" + xid + ", " + key + ") called");
+        Trace.info("CarRM::queryNum(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         int value = 0;
         if (curObj != null)
         {
             value = curObj.getCount();
         }
-        Trace.info("RM::queryNum(" + xid + ", " + key + ") returns count=" + value);
+        Trace.info("CarRM::queryNum(" + xid + ", " + key + ") returns count=" + value);
         return value;
     }
 
     // Query the price of an item
     protected int queryPrice(int xid, String key)
     {
-        Trace.info("RM::queryPrice(" + xid + ", " + key + ") called");
+        Trace.info("CarRM::queryPrice(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         int value = 0;
         if (curObj != null)
         {
             value = curObj.getPrice();
         }
-        Trace.info("RM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
+        Trace.info("CarRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
         return value;
     }
 }

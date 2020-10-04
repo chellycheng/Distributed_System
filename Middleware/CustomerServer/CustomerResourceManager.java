@@ -27,6 +27,13 @@ public interface CustomerResourceManager extends ResourceManager{
     boolean deleteCustomer(int id, int customerID) throws RemoteException;
 
     /**
+     * Check Delete a customer is possible.
+     *
+     * @return Success
+     */
+    boolean delete_check(int id, int customerID) throws RemoteException;
+
+    /**
      * Query the customer reservations.
      *
      * @return A formatted bill for the customer
@@ -48,8 +55,7 @@ public interface CustomerResourceManager extends ResourceManager{
     boolean reserveRoom(int id, int customerID, String key, String location, int price)
             throws RemoteException;
 
-    boolean bundle(int id, int customerID, Vector<String> flightNumbers, String location, boolean car, boolean room)
-            throws RemoteException;
+    boolean reserve_item(int id, int customerID) throws RemoteException;
 
     String getName() throws RemoteException;
 }

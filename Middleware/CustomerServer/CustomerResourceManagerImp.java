@@ -55,27 +55,27 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
     @Override
     public int newCustomer(int xid) throws RemoteException
     {
-        Trace.info("RM::newCustomer(" + xid + ") called");
+        Trace.info("CustomerRM::newCustomer(" + xid + ") called");
         // Generate a globally unique ID for the new customer
         int cid = Integer.parseInt(String.valueOf(xid) +
                 String.valueOf(Calendar.getInstance().get(Calendar.MILLISECOND)) +
                 String.valueOf(Math.round(Math.random() * 100 + 1)));
         Customer customer = new Customer(cid);
         writeData(xid, customer.getKey(), customer);
-        Trace.info("RM::newCustomer(" + cid + ") returns ID=" + cid);
+        Trace.info("CustomerRM::newCustomer(" + cid + ") returns ID=" + cid);
         return cid;
     }
 
     @Override
     public boolean newCustomer(int xid, int customerID) throws RemoteException
     {
-        Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") called");
+        Trace.info("CustomerRM::newCustomer(" + xid + ", " + customerID + ") called");
         Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
         if (customer == null)
         {
             customer = new Customer(customerID);
             writeData(xid, customer.getKey(), customer);
-            Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") created a new customer");
+            Trace.info("CustomerRM::newCustomer(" + xid + ", " + customerID + ") created a new customer");
             return true;
         }
         else
@@ -86,30 +86,30 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
     }
 
     @Override
-    public boolean deleteCustomer(int xid, int customerID) throws RemoteException
+    public boolean delete_check(int xid, int customerID) throws RemoteException
     {
-        Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") called");
         Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
         if (customer == null)
         {
-            Trace.warn("RM::deleteCustomer(" + xid + ", " + customerID + ") failed--customer doesn't exist");
+            Trace.warn("CustomerRM::deleteCustomer(" + xid + ", " + customerID + ") failed--customer doesn't exist");
+            return false;
+        }
+        return true;
+
+    }
+
+    @Override
+    public boolean deleteCustomer(int xid, int customerID) throws RemoteException
+    {
+        Trace.info("CustomerRM::deleteCustomer(" + xid + ", " + customerID + ") called");
+        Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
+        if (customer == null)
+        {
+            Trace.warn("CustomerRM::deleteCustomer(" + xid + ", " + customerID + ") failed--customer doesn't exist");
             return false;
         }
         else
         {
-            // Increase the reserved numbers of all reservable items which the customer reserved.
-            RMHashMap reservations = customer.getReservations();
-            for (String reservedKey : reservations.keySet())
-            {
-                ReservedItem reserveditem = customer.getReservedItem(reservedKey);
-                Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") has reserved " + reserveditem.getKey() + " " +  reserveditem.getCount() +  " times");
-                ReservableItem item  = (ReservableItem)readData(xid, reserveditem.getKey());
-                Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") has reserved " + reserveditem.getKey() + " which is reserved " +  item.getReserved() +  " times and is still available " + item.getCount() + " times");
-                item.setReserved(item.getReserved() - reserveditem.getCount());
-                item.setCount(item.getCount() + reserveditem.getCount());
-                writeData(xid, item.getKey(), item);
-            }
-
             // Remove the customer from the storage
             removeData(xid, customer.getKey());
             Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") succeeded");
@@ -155,8 +155,16 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
     }
 
     @Override
-    public boolean bundle(int id, int customerID, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException {
-        return false;
+    public boolean reserve_item(int xid, int customerID) throws RemoteException {
+        Trace.info("RM::reserveItem(" + xid + ", customer=" + customerID +  ") called" );
+        // Read customer object if it exists (and read lock it)
+        Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
+        if (customer == null)
+        {
+            Trace.warn("RM::reserveItem(" + xid + ", " + customerID + " failed--customer doesn't exist");
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -190,34 +198,6 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
             customer_data.remove(key);
         }
     }
-
-    // Deletes the Customer item
-    protected boolean deleteItem(int xid, String key)
-    {
-        Trace.info("RM::deleteItem(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        // Check if there is such an item in the storage
-        if (curObj == null)
-        {
-            Trace.warn("RM::deleteItem(" + xid + ", " + key + ") failed--item doesn't exist");
-            return false;
-        }
-        else
-        {
-            if (curObj.getReserved() == 0)
-            {
-                removeData(xid, curObj.getKey());
-                Trace.info("RM::deleteItem(" + xid + ", " + key + ") item deleted");
-                return true;
-            }
-            else
-            {
-                Trace.info("RM::deleteItem(" + xid + ", " + key + ") item can't be deleted because some customers have reserved it");
-                return false;
-            }
-        }
-    }
-
 
     // Reserve an item
     protected boolean reserveItem(int xid, int customerID, String key, String location, int price)

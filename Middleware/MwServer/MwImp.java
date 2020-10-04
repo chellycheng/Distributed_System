@@ -6,7 +6,6 @@ import CarServer.CarResourceManager;
 import FlightServer.FlightResourceManager;
 import RoomServer.RoomResourceManager;
 import CustomerServer.CustomerResourceManager;
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -93,7 +92,6 @@ public class MwImp implements MwInterface {
 
         //initialize the customer server resource
         this.ctm = new CustomerResourceManagerImp();
-//      rms.put(customerManager.getClass().getInterfaces()[0].getName(), customerManager);
 
     }
 
@@ -102,7 +100,6 @@ public class MwImp implements MwInterface {
 
         //initialize the customer server resource
         this.ctm = new CustomerResourceManagerImp();
-//      rms.put(customerManager.getClass().getInterfaces()[0].getName(), customerManager);
 
     }
 
@@ -213,12 +210,47 @@ public class MwImp implements MwInterface {
 
     @Override
     public boolean deleteCustomer(int xid, int customerID) throws RemoteException {
-        try{
-            return ctm.deleteCustomer(xid, customerID);
+        if(ctm.delete_check(xid,customerID)){
+            try{
+                String bill = ctm.queryCustomerInfo(xid,customerID);
+                // Increase the reserved numbers of all reservable items which the customer reserved.
+                String [] reservations = bill.split("\n");
+                Trace.info("TEST-reservation:: " + reservations[0]);
+                for(int i=1; i<reservations.length; i++){
+                    String[] temp = reservations[i].split(" ");
+                    int count = Integer.parseInt(temp[0]);
+                    String key = temp[1];
+
+                    String[] key_component = key.split("-");
+                    Trace.info("TEST-var1:: " + temp[0]);
+                    Trace.info("TEST-var2:: " + temp[1]);
+                    String resourceName = key_component[0];
+                    Trace.info("TEST-resourceName:: " + resourceName);
+                    try{
+                        switch (resourceName){
+                            case "flight":
+                                fm.reserve_cancel(xid, customerID, count, key);
+                                break;
+                            case "car":
+                                cm.reserve_cancel(xid, customerID, count, key);
+                                break;
+                            case "room":
+                                rm.reserve_cancel(xid, customerID, count, key);
+                                break;
+                        }
+                    }
+                    catch(Exception e){
+                        Trace.error("One of the reserve cancel failure ");
+                    }
+                }
+
+                return ctm.deleteCustomer(xid, customerID);
+            }
+            catch (Exception e){
+                throw new RemoteException("Fail to delete customer");
+            }
         }
-        catch (Exception e){
-            throw new RemoteException("Fail to delete customer");
-        }
+        return false;
     }
 
     @Override
@@ -299,15 +331,14 @@ public class MwImp implements MwInterface {
             key.toLowerCase();
             try{
                 //if the flight is available
-                if(fm.reserveFlight(xid, flightNum)){
+                if(fm.reserve_check(xid, flightNum) && ctm.reserve_item(xid, customerID)){
                     price = fm.queryFlightPrice(xid, flightNum);
                 }
             }
             catch(Exception e){
-                throw new RemoteException("Fail to access the info of flight");
+                throw new RemoteException("Fail to access the info of flight, or the client did not exist");
             }
-
-            return ctm.reserveFlight(xid, customerID, key, String.valueOf(flightNum), price);
+            return fm.reserveFlight(xid, flightNum) && ctm.reserveFlight(xid, customerID, key, String.valueOf(flightNum), price);
         }
         catch (Exception e){
             throw new RemoteException("Fail to reserve for the flight");
@@ -322,15 +353,16 @@ public class MwImp implements MwInterface {
             key.toLowerCase();
             try{
                 //if the flight is available
-                if(cm.reserveCar(xid, location)){
+                if(cm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
                     price = cm.queryCarsPrice(xid, location);
+
                 }
             }
             catch(Exception e){
-                throw new RemoteException("Fail to access the info of car");
+                throw new RemoteException("Fail to access the info of car, or the client did not exist");
             }
 
-            return ctm.reserveCar(xid, customerID, key, location, price);
+            return cm.reserveCar(xid, location) && ctm.reserveCar(xid, customerID, key, location, price);
         }
         catch (Exception e){
             throw new RemoteException("Fail to reserve for the car");
@@ -345,15 +377,16 @@ public class MwImp implements MwInterface {
             key.toLowerCase();
             try{
                 //if the flight is available
-                if(rm.reserveRoom(xid, location)){
+                if(rm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
                     price = rm.queryRoomsPrice(xid, location);
+
                 }
             }
             catch(Exception e){
-                throw new RemoteException("Fail to access the info of room");
+                throw new RemoteException("Fail to access the info of room, or the client did not exist");
             }
 
-            return ctm.reserveCar(xid, customerID, key, location, price);
+            return rm.reserveRoom(xid, location) && ctm.reserveCar(xid, customerID, key, location, price);
         }
         catch (Exception e){
             throw new RemoteException("Fail to reserve for the room");
@@ -362,64 +395,71 @@ public class MwImp implements MwInterface {
 
     @Override
     public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException {
-        boolean room_success = false;
-        boolean car_success = false;
-        boolean flight_success = false;
-        try {
-            try {
-                String room_key = "room-" + location;
-                room_key.toLowerCase();
-                if (room && rm.reserveRoom(xid, location)) {
-                    int room_price = rm.queryRoomsPrice(xid, location);
-                    ctm.reserveRoom(xid, customerId, room_key, location, room_price);
-                    Trace.info(xid+" Reserve for the room at " + location + " for " + customerId);
-                    room_success = true;
-                } else if (!room) {
-                    room_success = true;
-                }
+        Trace.info("TEST-car_in: " + car);
+        Trace.info("TEST-room_in: " + room);
+        boolean room_success = room && rm.reserve_check(xid, location);
+        boolean car_success = car && cm.reserve_check(xid, location);
+        for (String flightnumstring : flightNumbers) {
+            int flightNum = Integer.parseInt(flightnumstring);
+            if(!fm.reserve_check(xid, flightNum)){
+                Trace.info("FlightRM: Not able to reserve flight " + flightNum);
+                return false;
+            }
+        }
+        boolean client_success = ctm.reserve_item(xid,customerId);
+        Trace.info("TEST-room: " + room_success);
+        Trace.info("TEST-car: " + car_success);
+        boolean final_check = (room_success || !room) && (car_success || !car)  && client_success;
+        Trace.info("TEST-final: " + final_check);
+        if(final_check){
 
-            } catch (Exception e) {
+            try {
+                if (room) {
+                    String room_key = "room-" + location;
+                    room_key = room_key.toLowerCase();
+                    int room_price = rm.queryRoomsPrice(xid, location);
+                    rm.reserveRoom(xid, location);
+                    ctm.reserveCar(xid, customerId, room_key, location, room_price);
+                    Trace.info(xid + " Reserve for the room at " + location + " for " + customerId);
+                }
+            }
+            catch (Exception e) {
                 throw new RemoteException(xid + " Fail to reserve for the room at " + location + " for " + customerId);
             }
 
             try {
                 String car_key = "car-" + location;
-                car_key.toLowerCase();
-                if (car && cm.reserveCar(xid, location)) {
+                car_key = car_key.toLowerCase();
+                if (car) {
                     int car_price = cm.queryCarsPrice(xid, location);
+                    cm.reserveCar(xid, location);
                     ctm.reserveCar(xid, customerId, car_key, location, car_price);
-                    Trace.info(xid+" Reserve for the car at " + location + " for " + customerId);
-                    car_success = true;
-
-                } else if (!car) {
-                    car_success = true;
+                    Trace.info(xid + " Reserve for the car at " + location + " for " + customerId);
                 }
+
+
             } catch (Exception e) {
                 throw new RemoteException(xid + " Fail to reserve for the car at " + location + " for " + customerId);
             }
+
             try {
                 String flight_key = "flight-" + location;
-                flight_key.toLowerCase();
+                flight_key = flight_key.toLowerCase();
                 for (String flightnumstring : flightNumbers) {
                     int flightNum = Integer.parseInt(flightnumstring);
-                    if (reserveFlight(xid, customerId, flightNum)) {
-                        int flight_price = fm.queryFlightPrice(xid,flightNum);
-                        ctm.reserveFlight(xid, customerId, flight_key, flightnumstring, flight_price);
-                        Trace.info(xid+" Reserve for the flight " + flightnumstring + " for " + customerId);
-
-                    }
+                    int flight_price = fm.queryFlightPrice(xid, flightNum);
+                    fm.reserveFlight(xid,flightNum);
+                    ctm.reserveCar(xid, customerId, flight_key, location, flight_price);
                 }
-                flight_success = true;
             } catch (Exception e) {
-                throw new RemoteException(xid + " Fail to reserve for the car at " + location + " for " + customerId);
+                throw new RemoteException(xid + " Fail to reserve for the flight at " + location + " for " + customerId);
             }
-
-            return car_success && room_success && flight_success;
-
+            return true;
         }
-        catch (Exception e){
-            throw new RemoteException("Fail to reserve for the flight");
+        else{
+            return false;
         }
+
     }
 
     @Override

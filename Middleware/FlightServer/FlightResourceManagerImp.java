@@ -2,7 +2,6 @@
 package FlightServer;
 
 import Common.*;
-
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -58,14 +57,14 @@ public class FlightResourceManagerImp implements FlightResourceManager {
     @Override
     public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException
     {
-        Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
+        Trace.info("FlightRM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
         Flight curObj = (Flight)readData(xid, Flight.getKey(flightNum));
         if (curObj == null)
         {
             // Doesn't exist yet, add it
             Flight newObj = new Flight(flightNum, flightSeats, flightPrice);
             writeData(xid, newObj.getKey(), newObj);
-            Trace.info("RM::addFlight(" + xid + ") created new flight " + flightNum + ", seats=" + flightSeats + ", price=$" + flightPrice);
+            Trace.info("FlightRM::addFlight(" + xid + ") created new flight " + flightNum + ", seats=" + flightSeats + ", price=$" + flightPrice);
         }
         else
         {
@@ -76,7 +75,7 @@ public class FlightResourceManagerImp implements FlightResourceManager {
                 curObj.setPrice(flightPrice);
             }
             writeData(xid, curObj.getKey(), curObj);
-            Trace.info("RM::addFlight(" + xid + ") modified existing flight " + flightNum + ", seats=" + curObj.getCount() + ", price=$" + flightPrice);
+            Trace.info("FlightRM::addFlight(" + xid + ") modified existing flight " + flightNum + ", seats=" + curObj.getCount() + ", price=$" + flightPrice);
         }
         return true;
     }
@@ -84,49 +83,89 @@ public class FlightResourceManagerImp implements FlightResourceManager {
     @Override
     public boolean deleteFlight(int xid, int flightNum) throws RemoteException
     {
+        Trace.info("FlightRM::deleteFlgihts(" + xid + ") delete a flight " + flightNum);
         return deleteItem(xid, Flight.getKey(flightNum));
     }
 
     @Override
     public int queryFlight(int xid, int flightNum) throws RemoteException
     {
+        Trace.info("FlightRM::queryFlight(" + xid + ") query a flight " + flightNum);
         return queryNum(xid, Flight.getKey(flightNum));
     }
 
     @Override
     public int queryFlightPrice(int xid, int flightNum) throws RemoteException
     {
+        Trace.info("FlightRM::queryFlightPrice(" + xid + ") query a flight price " + flightNum);
         return queryPrice(xid, Flight.getKey(flightNum));
     }
 
     @Override
-    public boolean reserveFlight(int xid, int flightNum) throws RemoteException {
+    public boolean reserve_check(int xid, int flightNum) throws RemoteException {
+        String key = Flight.getKey(flightNum);
+        Flight item = (Flight)readData(xid, key);
+        if (item == null)
+        {
+            Trace.warn("FlightRM::reserve_check(" + xid + ", " + key + ", " + flightNum + ") failed--item doesn't exist");
+            return false;
+        }
+        else if (item.getCount() == 0) {
+            Trace.warn("FlightRM::reserve_check(" + xid + ", " + key + ", " + flightNum + ") failed--No more items");
+            return false;
+        }
+        return true;
+    }
 
+    @Override
+    public boolean reserve_cancel(int xid, int customerID, int count, String key) throws RemoteException {
+
+        try {
+            Trace.info("FlightRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + key + " " + count + " times");
+            Flight item = (Flight) readData(xid, key);
+            Trace.info("TEST-location::"+key);
+            if (item == null)
+            {
+                Trace.warn("FlightRM::reserve_cancel(" + xid +  ", " + key + ") failed--item doesn't exist");
+                return false;
+            }
+            Trace.info("FlightRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + key + " which is reserved " + item.getReserved() + " times and is still available " + item.getCount() + " times");
+            item.setReserved(item.getReserved() - count);
+            item.setCount(item.getCount() + count);
+            writeData(xid, item.getKey(), item);
+            return true;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            Trace.info("FlightRM::reserve_cancel(" + xid + ", Error when process" + customerID + ") with reservations on " + key );
+            return false;
+        }
+    }
+
+    @Override
+    public boolean reserveFlight(int xid, int flightNum) throws RemoteException {
         String key = Flight.getKey(flightNum);
         String location = String.valueOf(flightNum);
         Flight item = (Flight)readData(xid, key);
         if (item == null)
         {
-            Trace.warn("RM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
+            Trace.warn("FlightRM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
             return false;
         }
         else if (item.getCount() == 0)
         {
-            Trace.warn("RM::reserveItem(" + xid  + ", " + key + ", " + location + ") failed--No more items");
+            Trace.warn("FlightRM::reserveItem(" + xid  + ", " + key + ", " + location + ") failed--No more items");
             return false;
         }else{
             // Decrease the number of available items in the storage
+            Trace.warn("FlightRM::reserveFlight(Current Count: " + item.getCount());
             item.setCount(item.getCount() - 1);
             item.setReserved(item.getReserved() + 1);
             writeData(xid, item.getKey(), item);
+            Trace.warn("FlightRM::reserveFlight(Update Count: " + item.getCount());
         }
 
         return true;
-    }
-
-    @Override
-    public boolean bundle(int var1, int var2, Vector<String> var3, String var4, boolean var5, boolean var6) throws RemoteException {
-        return false;
     }
 
     @Override
@@ -166,12 +205,12 @@ public class FlightResourceManagerImp implements FlightResourceManager {
     // Deletes the flight item
     protected boolean deleteItem(int xid, String key)
     {
-        Trace.info("RM::deleteItem(" + xid + ", " + key + ") called");
+        Trace.info("FlightRM::deleteItem(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         // Check if there is such an item in the storage
         if (curObj == null)
         {
-            Trace.warn("RM::deleteItem(" + xid + ", " + key + ") failed--item doesn't exist");
+            Trace.warn("FlightRM::deleteItem(" + xid + ", " + key + ") failed--item doesn't exist");
             return false;
         }
         else
@@ -179,12 +218,12 @@ public class FlightResourceManagerImp implements FlightResourceManager {
             if (curObj.getReserved() == 0)
             {
                 removeData(xid, curObj.getKey());
-                Trace.info("RM::deleteItem(" + xid + ", " + key + ") item deleted");
+                Trace.info("FlightRM::deleteItem(" + xid + ", " + key + ") item deleted");
                 return true;
             }
             else
             {
-                Trace.info("RM::deleteItem(" + xid + ", " + key + ") item can't be deleted because some customers have reserved it");
+                Trace.info("FlightRM::deleteItem(" + xid + ", " + key + ") item can't be deleted because some customers have reserved it");
                 return false;
             }
         }
@@ -193,28 +232,28 @@ public class FlightResourceManagerImp implements FlightResourceManager {
     // Query the number of available seats/rooms/cars
     protected int queryNum(int xid, String key)
     {
-        Trace.info("RM::queryNum(" + xid + ", " + key + ") called");
+        Trace.info("FlightRM::queryNum(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         int value = 0;
         if (curObj != null)
         {
             value = curObj.getCount();
         }
-        Trace.info("RM::queryNum(" + xid + ", " + key + ") returns count=" + value);
+        Trace.info("FlightRM::queryNum(" + xid + ", " + key + ") returns count=" + value);
         return value;
     }
 
     // Query the price of an item
     protected int queryPrice(int xid, String key)
     {
-        Trace.info("RM::queryPrice(" + xid + ", " + key + ") called");
+        Trace.info("FlightRM::queryPrice(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         int value = 0;
         if (curObj != null)
         {
             value = curObj.getPrice();
         }
-        Trace.info("RM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
+        Trace.info("FlightRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
         return value;
     }
 }
