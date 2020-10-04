@@ -7,4 +7,4 @@
 
 # policy files
 Client/*.policy
-MiddleServer/*.policy
+Middleware/*.policy
