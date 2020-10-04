@@ -13,7 +13,7 @@ import java.io.*;
 public class RMIClient extends Client
 {
 	private static String s_serverHost = "localhost";
-	private static int s_serverPort = 1018;
+	private static int s_serverPort = 1048;
 	private static String s_serverName = "Server";
 
 	private static String s_rmiPrefix = "group_18_";
@@ -28,7 +28,10 @@ public class RMIClient extends Client
 		{
 			s_serverName = args[1];
 		}
-		if (args.length > 2)
+		if(args.length > 2){
+			s_serverPort = Integer.parseInt(args[2]);
+		}
+		if (args.length > 3)
 		{
 			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUsage: java client.RMIClient [server_hostname [server_rmiobject]]");
 			System.exit(1);

@@ -6,4 +6,5 @@
 *.jar
 
 # policy files
-*.policy
+Client/*.policy
+MiddleServer/*.policy
