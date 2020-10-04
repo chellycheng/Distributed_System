@@ -30,7 +30,6 @@ public class RMIClient extends Client
 		}
 		if(args.length > 2){
 			s_serverPort = Integer.parseInt(args[2]);
-			System.err.println("Here"+s_serverPort);
 		}
 		if (args.length > 3)
 		{
