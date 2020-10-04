@@ -82,11 +82,13 @@ public class MwImp implements MwInterface {
 
         //connect to the remote server resource
         try {
+            Trace.info(cm_host);
             this.cm = (CarResourceManager) connectRM(cm_host, cm_name);
             this.fm = (FlightResourceManager) connectRM(fm_host, fm_name);
             this.rm = (RoomResourceManager) connectRM(rm_host, rm_name);
         }
         catch (Exception e){
+            e.printStackTrace();
             Trace.info("Fail to connect to one or more remote server");
         }
 
