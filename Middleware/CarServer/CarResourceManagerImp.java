@@ -15,8 +15,12 @@ public class CarResourceManagerImp implements CarResourceManager{
 
     // Create a new car location or add cars to an existing location
     // NOTE: if price <= 0 and the location already exists, it maintains its current price
-    protected String car_name = "Car_server/1018";
+    protected String car_name = "Car_server/";
     protected RMHashMap car_data = new RMHashMap();
+
+    public CarResourceManagerImp(int port) {
+        this.car_name += port;
+    }
 
     public static void main(String[] args) {
         //default port:1018
@@ -36,7 +40,7 @@ public class CarResourceManagerImp implements CarResourceManager{
         Registry registry;
         try {
             // Initialize the CarResourceManagerImp and its poxy_object
-            CarResourceManagerImp obj = new CarResourceManagerImp();
+            CarResourceManagerImp obj = new CarResourceManagerImp(port);
             CarResourceManager proxyObj = (CarResourceManager) UnicastRemoteObject.exportObject(obj, 0);
             try{
                 registry = LocateRegistry.createRegistry(port);
