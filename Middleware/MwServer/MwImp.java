@@ -336,6 +336,10 @@ public class MwImp implements MwInterface {
                 if(fm.reserve_check(xid, flightNum) && ctm.reserve_item(xid, customerID)){
                     price = fm.queryFlightPrice(xid, flightNum);
                 }
+                else{
+                    Trace.info("ReserveFlight request is received, but failed due to lack of flight or customer");
+                    return false;
+                }
             }
             catch(Exception e){
                 throw new RemoteException("Fail to access the info of flight, or the client did not exist");
@@ -357,7 +361,10 @@ public class MwImp implements MwInterface {
                 //if the flight is available
                 if(cm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
                     price = cm.queryCarsPrice(xid, location);
-
+                }
+                else{
+                    Trace.info("ReserveCar request is received, but failed due to lack of car or customer");
+                    return false;
                 }
             }
             catch(Exception e){
@@ -381,7 +388,10 @@ public class MwImp implements MwInterface {
                 //if the flight is available
                 if(rm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
                     price = rm.queryRoomsPrice(xid, location);
-
+                }
+                else{
+                    Trace.info("ReserveRoom request is received, but failed due to lack of room or customer");
+                    return false;
                 }
             }
             catch(Exception e){
@@ -421,7 +431,7 @@ public class MwImp implements MwInterface {
                     room_key = room_key.toLowerCase();
                     int room_price = rm.queryRoomsPrice(xid, location);
                     rm.reserveRoom(xid, location);
-                    ctm.reserveCar(xid, customerId, room_key, location, room_price);
+                    ctm.reserveRoom(xid, customerId, room_key, location, room_price);
                     Trace.info(xid + " Reserve for the room at " + location + " for " + customerId);
                 }
             }
@@ -445,13 +455,13 @@ public class MwImp implements MwInterface {
             }
 
             try {
-                String flight_key = "flight-" + location;
-                flight_key = flight_key.toLowerCase();
                 for (String flightnumstring : flightNumbers) {
+                    String flight_key = "flight-" + flightnumstring;
+                    flight_key = flight_key.toLowerCase();
                     int flightNum = Integer.parseInt(flightnumstring);
                     int flight_price = fm.queryFlightPrice(xid, flightNum);
                     fm.reserveFlight(xid,flightNum);
-                    ctm.reserveCar(xid, customerId, flight_key, location, flight_price);
+                    ctm.reserveFlight(xid, customerId, flight_key, location, flight_price);
                 }
             } catch (Exception e) {
                 throw new RemoteException(xid + " Fail to reserve for the flight at " + location + " for " + customerId);

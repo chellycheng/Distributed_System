@@ -135,18 +135,20 @@ public class CarResourceManagerImp implements CarResourceManager{
         Car item = (Car)readData(xid, key);
         if (item == null)
         {
-            Trace.warn("CarRM::reserveItem(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
+            Trace.warn("CarRM::reserveCar(" + xid + ", " + key + ", " + location + ") failed--item doesn't exist");
             return false;
         }
         else if (item.getCount() == 0)
         {
-            Trace.warn("CarRM::reserveItem(" + xid  + ", " + key + ", " + location + ") failed--No more items");
+            Trace.warn("CarRM::reserveCar(" + xid  + ", " + key + ", " + location + ") failed--No more items");
             return false;
         }else{
             // Decrease the number of available items in the storage
+            Trace.warn("CarRM::reserveCar(Current Count: " + item.getCount());
             item.setCount(item.getCount() - 1);
             item.setReserved(item.getReserved() + 1);
             writeData(xid, item.getKey(), item);
+            Trace.warn("CarRM::reserveCar(Update Count: " + item.getCount());
         }
 
         return true;
