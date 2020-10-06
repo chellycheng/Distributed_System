@@ -1,22 +1,23 @@
-all: java.policy compile-test
+all: java.policy compile-server-rmi
 
 java.policy: FORCE
-	@echo "Creating client java policy"
+	@echo "Creating server java policy"
 	@echo "grant codebase \"file:`pwd`/\" {" > java.policy
 	@echo "permission java.security.AllPermission;" >> java.policy
 	@echo "};" >> java.policy
 
 FORCE: ;
 
-../Middleware/MwInterface.jar: ../Middleware/MwServer/MwInterface.java
-	make -C ../Server/ MwInterface.jar
+RMIInterface.jar: Server/Interface/IResourceManager.java
+	@echo "Compiling RMI server interface"
+	javac Server/Interface/IResourceManager.java
+	jar cvf RMIInterface.jar Server/Interface/IResourceManager.class
 
-compile-client: ../Middleware/MwInterface.jar
-	javac -cp ../Middleware/MwInterface.jar Client/*.java
+compile-server-rmi: Server/RMI/*.java Server/Interface/IResourceManager.java Server/Common/*.java
+	javac Server/RMI/*.java Server/Interface/IResourceManager.java Server/Common/*.java
 
-compile-test: ../Middleware/MwInterface.jar
-	javac -cp ../Middleware/MwInterface.jar ClientTest/*.java
 clean:
-	rm -f Client/*.class
-	rm -f ../Server/MwInterface.jar
-	rm -f java.policy
+
+	rm -f Server/Interface/*.class Server/Common/*.class Server/RMI/*.class
+	rm -f RMIInterface.jar
+	rm -f java.policy 
