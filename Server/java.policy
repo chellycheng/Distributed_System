@@ -1,3 +1,0 @@
-grant codebase "file:/home/davidyc/IdeaProjects/Distributed_System/Server/" {
-permission java.security.AllPermission;
-};

@@ -3,13 +3,13 @@ package ClientTest;
 import Client.Command;
 import Client.RMIClient;
 import org.junit.jupiter.api.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.rmi.RemoteException;
 import java.util.Vector;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RMIClientTest {
@@ -44,7 +44,7 @@ public class RMIClientTest {
         Vector<String> temp = new Vector<String>();
         temp.add("help");
         client.execute(Command.Help, temp);
-        assertThat(outContent.toString(), containsString("Commands supported by the client:"));
+        assertEquals(outContent.toString(), containsString("Commands supported by the client:"));
     }
 
     @Test
@@ -665,12 +665,8 @@ public class RMIClientTest {
         client.execute(Command.Bundle, temp);
     }
 
-
     private String pasrser(String target, String splitter){
         return target.split(splitter)[1];
     }
-
-
-
 
 }

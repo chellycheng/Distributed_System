@@ -13,6 +13,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import java.util.Vector;
 import ResourceManager.*;
+import TransanctionManager.TransactionManager;
+import Exception.*;
 
 
 public class MwImp implements MwInterface {
@@ -30,12 +32,13 @@ public class MwImp implements MwInterface {
     private final String ctm_name = "customer_server18";
     private static String s_serverName = "MwServer";
 
+    //Transaction Manager components
+    private TransactionManager tm;
+    private Hashtable<String, ResourceManager> mapping;
+
 
     public static void main(String[] args) throws Exception{
 
-        // use case
-        // user need to give the host and port for respectively
-        // car_server, flight_server, room_server
         if (args.length < 3) {
             System.out.println("Help: input format [carhost:port] [flighthost:port] [roomhost:port] [port]");
             return;
@@ -95,6 +98,11 @@ public class MwImp implements MwInterface {
         //initialize the customer server resource
         this.ctm = new CustomerResourceManagerImp();
 
+        //Transaction Manager components
+        //TODO: Initialize the mapping string -> Transaction Manager
+        //TODO: Initialize the transaction manager
+        //TODO: Initialize the lock manager
+
     }
 
     //test purpose
@@ -117,9 +125,6 @@ public class MwImp implements MwInterface {
             Registry registry = LocateRegistry.getRegistry(host, port);
             rm = (ResourceManager) registry.lookup(bind_name);
 
-            //why?
-            // rms.put(rm.getClass().getInterfaces()[0].getName(), rm);
-
         } catch (Exception e) {
             e.printStackTrace();
             Trace.info("Unable to connect to RM " + bind_name +" with address" + address);
@@ -130,8 +135,14 @@ public class MwImp implements MwInterface {
 
     }
 
+    //TODO: A function to reconnect
+
     @Override
     public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException {
+        //Using this function as example for D2
+        //TODO: Get the lock
+        //TODO: Query the parameter
+        //TODO: track of related manager
         try{
             return fm.addFlight(xid,flightNum,flightSeats,flightPrice);
         }
@@ -477,5 +488,39 @@ public class MwImp implements MwInterface {
     @Override
     public String getName() throws RemoteException {
         return "group_18_" + s_serverName;
+    }
+
+    //TODO: Overall todo, implmeneted the timeout stragegy, and new exceptiosn handling
+
+    @Override
+    public int start() throws RemoteException {
+        //TODO: communicate with transaction manager to get a transaction number
+        //TODO: return the number
+        //TODO: update the TM
+        return 0;
+    }
+
+    @Override
+    public boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException {
+        //TODO: xid-> find the all that needed, according to the log execute the comment
+        //TODO: After all succssful commit -> release the lock
+        //TODO: If any commit failed, revoke the aborted for each resource manager
+        //TODO: update TM
+        return false;
+    }
+
+    @Override
+    public void abort(int xid) throws RemoteException, InvalidTransactionException {
+        //TODO: Revoke the abort in every resource manager
+        //TODO: some sort of roll back is needed
+        //TODO: update TM
+    }
+
+    @Override
+    public boolean shutdown() throws RemoteException {
+        //TODO: call shutdown at every resource manager
+        //TODO: if(one of them fail to shutdown) -> failure, else -> success
+        //TODO: update TM
+        return false;
     }
 }

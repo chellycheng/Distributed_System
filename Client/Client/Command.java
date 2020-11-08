@@ -29,7 +29,15 @@ public enum Command {
 
 	Bundle("Book N flight numbers, and optionally a room and/or car at a location", "<xid>,<CustomerID>,<FlightNumber1>...<FlightNumberN>,<Location>,<Car-Y/N>,<Room-Y/N>"),
 
-	Quit("Exit the client application", "");
+	Quit("Exit the client application", ""),
+
+	//New added functions for project 2
+	Start("Start a new transaction",""),
+	Commit("Commit a given transaction", "<xid>"),
+	Abort("Abort a given transaction", "<xid>"),
+	Shutdown("Shutdown all servers","");
+
+
 
 	String m_description;
 	String m_args;

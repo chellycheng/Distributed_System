@@ -1,3 +1,0 @@
-grant codebase "file:/Users/hehuimincheng/COMP512/Distributed_System/Middleware/" {
-permission java.security.AllPermission;
-};

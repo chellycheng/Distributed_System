@@ -3,6 +3,7 @@ package MwServer;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
+import Exception.*;
 
 public interface MwInterface extends Remote{
 
@@ -51,6 +52,15 @@ public interface MwInterface extends Remote{
     boolean bundle(int var1, int var2, Vector<String> var3, String var4, boolean var5, boolean var6) throws RemoteException;
 
     String getName() throws RemoteException;
+
+    int start() throws RemoteException;
+
+    boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException;
+
+    void abort(int xid) throws RemoteException,InvalidTransactionException;
+
+    boolean shutdown() throws RemoteException;
+
 
 
 }

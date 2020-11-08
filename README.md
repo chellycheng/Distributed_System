@@ -1,16 +1,53 @@
 # comp512-project
-
-To run the RMI resource manager:
+Project on distributed system.
+## Structure
+```
+--Clinet
+|
+|-Middleware
+    |-MwServer
+    |-CarServer
+    |-RoomServer
+    |-FlightServer
+    |-CustomerServer
 
 ```
-cd Server/
-./run_server.sh [<rmi_name>] # starts a single ResourceManager
-./run_servers.sh # convenience script for starting multiple resource managers
+## Build
+```
+cd Middleware/
+make
+cd Client/
+make
 ```
 
-To run the RMI client:
+## Instructions
+To run the RMI resource managers and Middleware locally:
+
+```
+cd Middleware/
+./run_roomserver.sh
+./run_carserver.sh
+./run_flightserver.sh
+./run_server.sh localhost localhost localhost 1018
+```
+
+To run the RMI client locally:
 
 ```
 cd Client
-./run_client.sh [<server_hostname> [<server_rmi_name>]]
+localhost:1018/group_18_MwServer
 ```
+To run the whole project on cloud:
+- You need to have set up public key with you SOCS account
+- You need to add key for remote location to know_hosts
+- You need to clone/pull the project on cloud
+- You need to build the project on cloud
+- You need to verify the port is available
+- Remember to change the account name inside the file
+```
+at local
+cd Middleware/
+./run_servers.sh 
+```
+
+

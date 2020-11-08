@@ -4,7 +4,8 @@
 
 # Package
 *.jar
-
+# folder
+/out
 # policy files
 Client/java.policy
 Middleware/java.policy

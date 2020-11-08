@@ -8,6 +8,7 @@ import java.rmi.RemoteException;
 import java.rmi.ConnectException;
 import java.rmi.ServerException;
 import java.rmi.UnmarshalException;
+import Exception.*;
 
 public abstract class Client
 {
@@ -67,7 +68,7 @@ public abstract class Client
 		}
 	}
 
-	public void execute(Command cmd, Vector<String> arguments) throws RemoteException, NumberFormatException
+	public void execute(Command cmd, Vector<String> arguments) throws RemoteException, NumberFormatException, InvalidTransactionException, TransactionAbortedException
 	{
 		switch (cmd)
 		{
@@ -413,11 +414,47 @@ public abstract class Client
 				}
 				break;
 			}
-			case Quit:
+			case Quit: {
 				checkArgumentsCount(1, arguments.size());
 
 				System.out.println("Quitting client");
+				break;
+			}
+			case Start: {
+				checkArgumentsCount(1, arguments.size());
+				int id = m_resourceManager.start();
+				System.out.println("Client starts the transaction: " + id);
+				break;
+			}
+			case Commit: {
+				checkArgumentsCount(1, arguments.size());
+				int id = toInt(arguments.elementAt(1));
+				if (m_resourceManager.commit(id)) {
+					System.out.println("Transaction [x=id "+ id +"] successfully committed");
+				}
+				else{
+					System.out.println("Transaction [x=id "+ id +"] could not be committed");
+				}
+
+				break;
+			}
+			case Abort: {
+				checkArgumentsCount(1, arguments.size());
+				int id = toInt(arguments.elementAt(1));
+				m_resourceManager.abort(id);
+				System.out.println("Transaction [x=id "+ id +"] successfully aborted");
+				break;
+			}
+			case Shutdown: {
+
+				checkArgumentsCount(1, arguments.size());
+				if (m_resourceManager.shutdown()) {
+					System.out.println("Shutdown server successfully");
+				} else {
+					System.out.println("The servers could not be shut down");
+				}
 				System.exit(0);
+			}
 		}
 	}
 
