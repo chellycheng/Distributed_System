@@ -168,6 +168,21 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
     }
 
     @Override
+    public boolean commit(int xid) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public void abort(int xid) throws RemoteException {
+
+    }
+
+    @Override
+    public boolean shutdown() throws RemoteException {
+        return false;
+    }
+
+    @Override
     public String getName() throws RemoteException {
         return customer_name;
     }
