@@ -1,30 +1,27 @@
 package TransanctionManager;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-
+import java.util.*;
 import Common.Trace;
 import Exception.TransactionAbortedException;
 import Exception.InvalidTransactionException;
 import MwServer.MwImp;
 import ResourceManager.ResourceManager;
 
-
 public class TransactionManager {
 
     // TIMEOUT
-    public static final long TRANSANCTION_TIMEOUT = 1000000;
-    public static final long RESPONSE_TIMEOUT = 1000;
+    public static final long TRANSACTION_TIMEOUT = 1000000;
 
     private MwImp mw;
     private int tid;
     private Hashtable<Integer, Transaction> transactions;
+    private Hashtable<Integer, Timer> timers;
 
     public TransactionManager(MwImp mw){
         this.mw = mw;
         transactions =  new Hashtable<>();
+        timers = new Hashtable<>();
         this.tid = 0;
 
     }
@@ -32,6 +29,7 @@ public class TransactionManager {
         tid ++;
         Trace.info("Transaction Manger: Start the transaction" + tid);
         transactions.put(tid,new Transaction());
+        resetTimeout(tid);
         return tid;
     }
 
@@ -46,7 +44,6 @@ public class TransactionManager {
             throw new InvalidTransactionException(
                     transactionId, "Cannot commit this transaction (status: " + t.status + ").");
         }
-        //TODO: commit failure
         Trace.info("Transaction Manger: Commit starts");
         t.status = TransactionStatus.IN_COMMIT;
         boolean success = true;
@@ -54,6 +51,10 @@ public class TransactionManager {
             Trace.info("Transaction Manger: Commit is running for"+ rm_name);
             ResourceManager rm = this.mw.mapping.get(rm_name);
             success &= this.commit(transactionId);
+        }
+        if(!success){
+            //TODO: commit failure
+            throw new TransactionAbortedException(transactionId, "Aborted");
         }
         return success;
     }
@@ -105,6 +106,7 @@ public class TransactionManager {
         String rm_name = rm.getName();
         Trace.info("Enlisting " + rm_name + " for transaction " + id);
         transactions.get(id).rms.add(rm_name);
+        resetTimeout(id);
     }
 
     public boolean verifyTransactionId(int xid){
@@ -115,4 +117,36 @@ public class TransactionManager {
             return false;
         }
     }
+    //TOOD: purge somewhere
+    public void resetTimeout(int xid) {
+        if (verifyTransactionId(xid)) {
+            // Cancel the previous timer
+            TransactionStatus status = transactions.get(xid).status;
+            if (timers.containsKey(xid)) {
+                timers.get(xid).cancel();
+            }
+
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (status == TransactionStatus.ACTIVE) {
+                                Trace.info("Timeout. Aborting transaction " + xid);
+                                abort(xid);
+                            }
+                            else{
+                                Trace.info("Timer is useless "+ xid);
+                                timers.remove(timer);
+                            }
+                        } catch (Exception e) {
+                            // Ignore.
+                        }
+                    }
+                }, TRANSACTION_TIMEOUT);
+                timers.put(xid, timer);
+
+        }
+    }
+
 }

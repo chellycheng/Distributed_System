@@ -570,7 +570,7 @@ public class MwImp implements MwInterface {
         return "group_18_" + s_serverName;
     }
 
-    //TODO: Overall todo, implmeneted the timeout stragegy
+    //TODO: Overall todo, implemeneted the timeout stragegy
 
     @Override
     public int start() throws RemoteException {
@@ -583,7 +583,7 @@ public class MwImp implements MwInterface {
         if(tm.commit(xid)){
             return true;
         }
-        //TODO: After all sucessful commit -> release the lock
+        //TODO: After all successful commit -> release the lock
         return false;
     }
 
