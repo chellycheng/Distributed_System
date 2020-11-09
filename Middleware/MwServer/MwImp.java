@@ -130,8 +130,8 @@ public class MwImp implements MwInterface {
 
     }
 
-    //TODO: A function to reconnect
-
+    //TODO: A function to reconnect, operation timeout
+    //TODO: Abort handling
     @Override
     public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,InvalidTransactionException {
         //Using this function as example for D2
@@ -307,7 +307,7 @@ public class MwImp implements MwInterface {
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
-        tm.enlist(xid, rm);
+        tm.enlist(xid, fm);
         try{
             return fm.queryFlight(xid, flightNum);
         }
@@ -318,6 +318,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public int queryCars(int xid, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, cm);
         try{
             return cm.queryCars(xid, location);
         }
@@ -328,6 +332,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public int queryRooms(int xid, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, rm);
         try{
             return rm.queryRooms(xid, location);
         }
@@ -338,6 +346,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public String queryCustomerInfo(int xid, int customerID) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, ctm);
         try{
             return ctm.queryCustomerInfo(xid, customerID);
         }
@@ -348,6 +360,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public int queryFlightPrice(int xid, int flightNum) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, fm);
         try{
             return fm.queryFlightPrice(xid, flightNum);
         }
@@ -358,6 +374,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public int queryCarsPrice(int xid, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, cm);
         try{
             return cm.queryCarsPrice(xid, location);
         }
@@ -368,6 +388,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public int queryRoomsPrice(int xid, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, rm);
         try{
             return rm.queryRoomsPrice(xid, location);
         }
@@ -378,6 +402,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, fm);
         try{
             int price = -1;
             String key = "flight-" + flightNum;
@@ -404,6 +432,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public boolean reserveCar(int xid, int customerID, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, cm);
         try{
             int price = -1;
             String key = "car-" + location;
@@ -431,6 +463,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, rm);
         try{
             int price = -1;
             String key = "room-" + location;
@@ -458,6 +494,10 @@ public class MwImp implements MwInterface {
 
     @Override
     public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+
         Trace.info("TEST-car_in: " + car);
         Trace.info("TEST-room_in: " + room);
         boolean room_success = room && rm.reserve_check(xid, location);
