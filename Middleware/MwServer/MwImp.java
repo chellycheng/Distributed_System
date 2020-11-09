@@ -34,7 +34,7 @@ public class MwImp implements MwInterface {
 
     //Transaction Manager components
     private TransactionManager tm;
-    private Hashtable<String, ResourceManager> mapping;
+    public Hashtable<String, ResourceManager> mapping;
 
 
     public static void main(String[] args) throws Exception{
@@ -99,17 +99,12 @@ public class MwImp implements MwInterface {
         this.ctm = new CustomerResourceManagerImp();
 
         //Transaction Manager components
-        //TODO: Initialize the mapping string -> Transaction Manager
-        //TODO: Initialize the transaction manager
+        tm = new TransactionManager(this);
+        mapping.put("Car_server", this.cm);
+        mapping.put("Room_server", this.rm);
+        mapping.put("Flight_server", this.fm);
+
         //TODO: Initialize the lock manager
-
-    }
-
-    //test purpose
-    public MwImp(){
-
-        //initialize the customer server resource
-        this.ctm = new CustomerResourceManagerImp();
 
     }
 
@@ -138,11 +133,16 @@ public class MwImp implements MwInterface {
     //TODO: A function to reconnect
 
     @Override
-    public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException {
+    public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,InvalidTransactionException {
         //Using this function as example for D2
         //TODO: Get the lock
         //TODO: Query the parameter
         //TODO: track of related manager
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, fm);
+
         try{
             return fm.addFlight(xid,flightNum,flightSeats,flightPrice);
         }
@@ -152,7 +152,12 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean addCars(int xid, String location, int count, int price) throws RemoteException {
+    public boolean addCars(int xid, String location, int count, int price) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, cm);
+
         try{
             return cm.addCars(xid, location, count, price);
         }
@@ -162,7 +167,11 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean addRooms(int xid, String location, int count, int price) throws RemoteException {
+    public boolean addRooms(int xid, String location, int count, int price) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, rm);
         try{
             return rm.addRooms(xid, location, count, price);
         }
@@ -172,9 +181,13 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int newCustomer(int id) throws RemoteException {
+    public int newCustomer(int xid) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, ctm);
         try{
-            return ctm.newCustomer(id);
+            return ctm.newCustomer(xid);
         }
         catch (Exception e){
             throw new RemoteException("Fail to call new customer1");
@@ -182,9 +195,14 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean newCustomer(int id, int cid) throws RemoteException {
+    public boolean newCustomer(int xid, int cid) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, ctm);
+
         try{
-            return ctm.newCustomer(id, cid);
+            return ctm.newCustomer(xid, cid);
         }
         catch (Exception e){
             throw new RemoteException("Fail to call new customer2");
@@ -192,7 +210,11 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean deleteFlight(int xid, int flightNum) throws RemoteException {
+    public boolean deleteFlight(int xid, int flightNum) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, fm);
         try{
             return fm.deleteFlight(xid, flightNum);
         }
@@ -202,7 +224,12 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean deleteCars(int xid, String location) throws RemoteException {
+    public boolean deleteCars(int xid, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, cm);
+
         try{
             return cm.deleteCars(xid, location);
         }
@@ -212,7 +239,11 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean deleteRooms(int xid, String location) throws RemoteException {
+    public boolean deleteRooms(int xid, String location) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, rm);
         try{
             return rm.deleteRooms(xid, location);
         }
@@ -222,7 +253,12 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean deleteCustomer(int xid, int customerID) throws RemoteException {
+    public boolean deleteCustomer(int xid, int customerID) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, ctm);
+
         if(ctm.delete_check(xid,customerID)){
             try{
                 String bill = ctm.queryCustomerInfo(xid,customerID);
@@ -267,7 +303,11 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int queryFlight(int xid, int flightNum) throws RemoteException {
+    public int queryFlight(int xid, int flightNum) throws RemoteException,InvalidTransactionException {
+        if(!tm.verifyTransactionId(xid)){
+            throw new InvalidTransactionException(xid, "Non-exist");
+        }
+        tm.enlist(xid, rm);
         try{
             return fm.queryFlight(xid, flightNum);
         }
@@ -277,7 +317,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int queryCars(int xid, String location) throws RemoteException {
+    public int queryCars(int xid, String location) throws RemoteException,InvalidTransactionException {
         try{
             return cm.queryCars(xid, location);
         }
@@ -287,7 +327,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int queryRooms(int xid, String location) throws RemoteException {
+    public int queryRooms(int xid, String location) throws RemoteException,InvalidTransactionException {
         try{
             return rm.queryRooms(xid, location);
         }
@@ -297,7 +337,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public String queryCustomerInfo(int xid, int customerID) throws RemoteException {
+    public String queryCustomerInfo(int xid, int customerID) throws RemoteException,InvalidTransactionException {
         try{
             return ctm.queryCustomerInfo(xid, customerID);
         }
@@ -307,7 +347,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int queryFlightPrice(int xid, int flightNum) throws RemoteException {
+    public int queryFlightPrice(int xid, int flightNum) throws RemoteException,InvalidTransactionException {
         try{
             return fm.queryFlightPrice(xid, flightNum);
         }
@@ -317,7 +357,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int queryCarsPrice(int xid, String location) throws RemoteException {
+    public int queryCarsPrice(int xid, String location) throws RemoteException,InvalidTransactionException {
         try{
             return cm.queryCarsPrice(xid, location);
         }
@@ -327,7 +367,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int queryRoomsPrice(int xid, String location) throws RemoteException {
+    public int queryRoomsPrice(int xid, String location) throws RemoteException,InvalidTransactionException {
         try{
             return rm.queryRoomsPrice(xid, location);
         }
@@ -337,7 +377,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException {
+    public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException,InvalidTransactionException {
         try{
             int price = -1;
             String key = "flight-" + flightNum;
@@ -363,7 +403,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean reserveCar(int xid, int customerID, String location) throws RemoteException {
+    public boolean reserveCar(int xid, int customerID, String location) throws RemoteException,InvalidTransactionException {
         try{
             int price = -1;
             String key = "car-" + location;
@@ -390,7 +430,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException {
+    public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException,InvalidTransactionException {
         try{
             int price = -1;
             String key = "room-" + location;
@@ -417,7 +457,7 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException {
+    public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException,InvalidTransactionException {
         Trace.info("TEST-car_in: " + car);
         Trace.info("TEST-room_in: " + room);
         boolean room_success = room && rm.reserve_check(xid, location);
@@ -490,37 +530,30 @@ public class MwImp implements MwInterface {
         return "group_18_" + s_serverName;
     }
 
-    //TODO: Overall todo, implmeneted the timeout stragegy, and new exceptiosn handling
+    //TODO: Overall todo, implmeneted the timeout stragegy
 
     @Override
     public int start() throws RemoteException {
-        //TODO: communicate with transaction manager to get a transaction number
-        //TODO: return the number
-        //TODO: update the TM
-        return 0;
+        return tm.start();
     }
 
     @Override
     public boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException {
-        //TODO: xid-> find the all that needed, according to the log execute the comment
-        //TODO: After all succssful commit -> release the lock
-        //TODO: If any commit failed, revoke the aborted for each resource manager
-        //TODO: update TM
+        //TODO: Make this method only allow one to commit at a time  synchronize???
+        if(tm.commit(xid)){
+            return true;
+        }
+        //TODO: After all sucessful commit -> release the lock
         return false;
     }
 
     @Override
     public void abort(int xid) throws RemoteException, InvalidTransactionException {
-        //TODO: Revoke the abort in every resource manager
-        //TODO: some sort of roll back is needed
-        //TODO: update TM
+        tm.abort(xid);
     }
 
     @Override
     public boolean shutdown() throws RemoteException {
-        //TODO: call shutdown at every resource manager
-        //TODO: if(one of them fail to shutdown) -> failure, else -> success
-        //TODO: update TM
-        return false;
+        return tm.shutdown();
     }
 }

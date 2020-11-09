@@ -15,7 +15,7 @@ import java.rmi.RemoteException;
 
 public class RoomResourceManagerImp implements RoomResourceManager {
 
-    protected String room_name = "Room_server/1018";
+    protected String room_name = "Room_server";
     protected RMHashMap room_data = new RMHashMap();
 
     public static void main(String[] args) {
@@ -249,5 +249,21 @@ public class RoomResourceManagerImp implements RoomResourceManager {
         }
         Trace.info("RoomRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
         return value;
+    }
+
+    @Override
+    public boolean commit(int xid) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public void abort(int xid) throws RemoteException {
+
+    }
+
+    @Override
+    public boolean shutdown() throws RemoteException {
+        System.exit(0);
+        return true;
     }
 }

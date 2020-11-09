@@ -6,7 +6,6 @@ import java.util.Set;
 
 public class Transaction implements Serializable {
 
-    private static final long serialVersionUID = 2084803164578661556L;
     public Set<String> rms; // The resource managers involved in the transaction
     public TransactionStatus status;
 

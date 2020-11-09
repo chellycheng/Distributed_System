@@ -15,12 +15,8 @@ public class CarResourceManagerImp implements CarResourceManager{
 
     // Create a new car location or add cars to an existing location
     // NOTE: if price <= 0 and the location already exists, it maintains its current price
-    protected String car_name = "Car_server/";
+    protected String car_name = "Car_server";
     protected RMHashMap car_data = new RMHashMap();
-
-    public CarResourceManagerImp(int port) {
-        this.car_name += port;
-    }
 
     public static void main(String[] args) {
         //default port:1018
@@ -40,7 +36,7 @@ public class CarResourceManagerImp implements CarResourceManager{
         Registry registry;
         try {
             // Initialize the CarResourceManagerImp and its poxy_object
-            CarResourceManagerImp obj = new CarResourceManagerImp(port);
+            CarResourceManagerImp obj = new CarResourceManagerImp();
             CarResourceManager proxyObj = (CarResourceManager) UnicastRemoteObject.exportObject(obj, 0);
             try{
                 registry = LocateRegistry.createRegistry(port);
@@ -259,5 +255,21 @@ public class CarResourceManagerImp implements CarResourceManager{
         }
         Trace.info("CarRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
         return value;
+    }
+
+    @Override
+    public boolean commit(int xid) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public void abort(int xid) throws RemoteException {
+
+    }
+
+    @Override
+    public boolean shutdown() throws RemoteException {
+        System.exit(0);
+        return true;
     }
 }

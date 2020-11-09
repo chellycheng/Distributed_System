@@ -20,5 +20,4 @@ public interface RoomResourceManager extends ResourceManager{
 
     boolean reserveRoom(int var1, String var2) throws RemoteException;
 
-    String getName() throws RemoteException;
 }

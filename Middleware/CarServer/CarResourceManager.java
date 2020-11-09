@@ -19,5 +19,4 @@ public interface CarResourceManager extends ResourceManager{
 
     boolean reserveCar(int var1, String var2) throws RemoteException;
 
-    String getName() throws RemoteException;
 }

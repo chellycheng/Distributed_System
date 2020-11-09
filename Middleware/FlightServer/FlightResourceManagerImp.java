@@ -12,7 +12,7 @@ import java.rmi.RemoteException;
 public class FlightResourceManagerImp implements FlightResourceManager {
 
 
-    protected String flight_name = "Flight_server/1018";
+    protected String flight_name = "Flight_server";
     protected RMHashMap flight_data = new RMHashMap();
 
     public static void main(String[] args) {
@@ -255,5 +255,21 @@ public class FlightResourceManagerImp implements FlightResourceManager {
         }
         Trace.info("FlightRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
         return value;
+    }
+
+    @Override
+    public boolean commit(int xid) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public void abort(int xid) throws RemoteException {
+
+    }
+
+    @Override
+    public boolean shutdown() throws RemoteException {
+        System.exit(0);
+        return true;
     }
 }

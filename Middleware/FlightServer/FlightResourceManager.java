@@ -17,6 +17,4 @@ public interface FlightResourceManager extends ResourceManager{
     boolean reserve_cancel(int var1, int var2, int var3, String var4) throws RemoteException;
 
     boolean reserveFlight(int var1, int var2) throws RemoteException;
-
-    String getName() throws RemoteException;
 }
