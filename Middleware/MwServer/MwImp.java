@@ -1,5 +1,4 @@
 package MwServer;
-import MwServer.MwInterface;
 import Common.*;
 import CustomerServer.*;
 import CarServer.CarResourceManager;
@@ -13,8 +12,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import java.util.Vector;
 import ResourceManager.*;
-import TransanctionManager.TransactionManager;
-import Exception.*;
+import TransactionManager.TransactionManager;
+import Exceptions.*;
 
 
 public class MwImp implements MwInterface {
@@ -34,7 +33,7 @@ public class MwImp implements MwInterface {
 
     //Transaction Manager components
     private TransactionManager tm;
-    public Hashtable<String, ResourceManager> mapping;
+
 
 
     public static void main(String[] args) throws Exception{
@@ -81,6 +80,7 @@ public class MwImp implements MwInterface {
             System.setSecurityManager(new SecurityManager());
         }
     }
+
     public MwImp( String cm_host, String fm_host, String rm_host){
 
         //connect to the remote server resource
@@ -99,10 +99,7 @@ public class MwImp implements MwInterface {
         this.ctm = new CustomerResourceManagerImp();
 
         //Transaction Manager components
-        tm = new TransactionManager(this);
-        mapping.put("Car_server", this.cm);
-        mapping.put("Room_server", this.rm);
-        mapping.put("Flight_server", this.fm);
+        tm = new TransactionManager(cm, rm, fm, ctm);
 
         //TODO: Initialize the lock manager
 
@@ -264,17 +261,13 @@ public class MwImp implements MwInterface {
                 String bill = ctm.queryCustomerInfo(xid,customerID);
                 // Increase the reserved numbers of all reservable items which the customer reserved.
                 String [] reservations = bill.split("\n");
-                Trace.info("TEST-reservation:: " + reservations[0]);
                 for(int i=1; i<reservations.length; i++){
                     String[] temp = reservations[i].split(" ");
                     int count = Integer.parseInt(temp[0]);
                     String key = temp[1];
 
                     String[] key_component = key.split("-");
-                    Trace.info("TEST-var1:: " + temp[0]);
-                    Trace.info("TEST-var2:: " + temp[1]);
                     String resourceName = key_component[0];
-                    Trace.info("TEST-resourceName:: " + resourceName);
                     try{
                         switch (resourceName){
                             case "flight":

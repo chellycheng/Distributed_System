@@ -1,10 +1,9 @@
-package TransanctionManager;
-
+package TransactionManager;
 import java.rmi.RemoteException;
 import java.util.*;
 import Common.Trace;
-import Exception.TransactionAbortedException;
-import Exception.InvalidTransactionException;
+import Exceptions.TransactionAbortedException;
+import Exceptions.InvalidTransactionException;
 import MwServer.MwImp;
 import ResourceManager.ResourceManager;
 
@@ -13,16 +12,20 @@ public class TransactionManager {
     // TIMEOUT
     public static final long TRANSACTION_TIMEOUT = 1000000;
 
-    private MwImp mw;
     private int tid;
     private Hashtable<Integer, Transaction> transactions;
     private Hashtable<Integer, Timer> timers;
+    public Hashtable<String, ResourceManager> mapping;
 
-    public TransactionManager(MwImp mw){
-        this.mw = mw;
+    public TransactionManager(ResourceManager rm1,ResourceManager rm2, ResourceManager rm3, ResourceManager rm4 ){
         transactions =  new Hashtable<>();
         timers = new Hashtable<>();
         this.tid = 0;
+        mapping = new Hashtable<String, ResourceManager>();
+        mapping.put("Car_server", rm1);
+        mapping.put("Room_server", rm2);
+        mapping.put("Flight_server", rm3);
+        mapping.put("Customer_server", rm4);
 
     }
     public int start() throws RemoteException{
@@ -49,13 +52,14 @@ public class TransactionManager {
         boolean success = true;
         for (String rm_name : t.rms) {
             Trace.info("Transaction Manger: Commit is running for"+ rm_name);
-            ResourceManager rm = this.mw.mapping.get(rm_name);
-            success &= this.commit(transactionId);
+            ResourceManager rm = mapping.get(rm_name);
+            success &= rm.commit(transactionId);
         }
         if(!success){
             //TODO: commit failure
             throw new TransactionAbortedException(transactionId, "Aborted");
         }
+        t.status = TransactionStatus.COMMITTED;
         return success;
     }
 
@@ -70,7 +74,7 @@ public class TransactionManager {
                 throw new InvalidTransactionException(transactionId, "now status-"+ t.status);
             }
             t.status = TransactionStatus.IN_ABORT;
-            for(ResourceManager rm: this.mw.mapping.values()){
+            for(ResourceManager rm: mapping.values()){
                 Trace.info("Transaction Manger: Shutdown is running for"+ rm.getName());
                 rm.abort(transactionId);
                 Trace.info("Transaction Manger: Abort successfully.");
@@ -88,15 +92,18 @@ public class TransactionManager {
             }
         }
         try {
-            for(ResourceManager rm: this.mw.mapping.values()){
-                Trace.info("Transaction Manger: Shutdown is running for"+ rm.getName());
-                rm.shutdown();
-                Trace.info("Transaction Manger: Shutdown successfully.");
+            for(ResourceManager rm: mapping.values()){
+                if(!rm.getName().equals("Customer_server")){
+                    Trace.info("Transaction Manger: Shutdown is running for "+ rm.getName());
+                    rm.shutdown();
+                    Trace.info("Transaction Manger: Shutdown successfully.");
+                }
             }
-            System.exit(0);
+            mapping.get("Customer_server").shutdown();
             return true;
         }
         catch(Exception e){
+            e.printStackTrace();
             Trace.info("Transaction Manger: Shutdown fail for resource managers.");
             return false;
         }
@@ -110,7 +117,7 @@ public class TransactionManager {
     }
 
     public boolean verifyTransactionId(int xid){
-        if(transactions.contains(xid)){
+        if(transactions.containsKey(xid)){
             return true;
         }
         else{
@@ -144,9 +151,22 @@ public class TransactionManager {
                         }
                     }
                 }, TRANSACTION_TIMEOUT);
-                timers.put(xid, timer);
 
+                timers.put(xid, timer);
         }
+    }
+
+    private boolean selfDestroy(int status) {
+
+        Timer shutdownTimer = new Timer();
+        shutdownTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.exit(status);
+            }
+        }, 1000);
+
+        return true;
     }
 
 }

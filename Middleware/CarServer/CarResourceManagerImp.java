@@ -2,6 +2,7 @@ package CarServer;
 
 import Common.*;
 import FlightServer.Flight;
+import ResourceManager.ReservationManager;
 
 import java.util.Vector;
 
@@ -11,7 +12,7 @@ import java.rmi.registry.Registry;
 
 import java.rmi.server.UnicastRemoteObject;
 
-public class CarResourceManagerImp implements CarResourceManager{
+public class CarResourceManagerImp extends ReservationManager<Car>  implements CarResourceManager{
 
     // Create a new car location or add cars to an existing location
     // NOTE: if price <= 0 and the location already exists, it maintains its current price
@@ -269,7 +270,6 @@ public class CarResourceManagerImp implements CarResourceManager{
 
     @Override
     public boolean shutdown() throws RemoteException {
-        System.exit(0);
-        return true;
+        return selfDestroy(0);
     }
 }
