@@ -131,8 +131,6 @@ public class MwImp implements MwInterface {
     public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,InvalidTransactionException {
         //Using this function as example for D2
         //TODO: Get the lock
-        //TODO: Query the parameter
-        //TODO: track of related manager
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist or non active");
         }
@@ -269,12 +267,15 @@ public class MwImp implements MwInterface {
                     try{
                         switch (resourceName){
                             case "flight":
+                                tm.enlist(xid, fm);
                                 fm.reserve_cancel(xid, customerID, count, key);
                                 break;
                             case "car":
+                                tm.enlist(xid, cm);
                                 cm.reserve_cancel(xid, customerID, count, key);
                                 break;
                             case "room":
+                                tm.enlist(xid, rm);
                                 rm.reserve_cancel(xid, customerID, count, key);
                                 break;
                         }
@@ -575,8 +576,6 @@ public class MwImp implements MwInterface {
     public String getName() throws RemoteException {
         return "group_18_" + s_serverName;
     }
-
-    //TODO: Overall todo, implemeneted the timeout stragegy
 
     @Override
     public int start() throws RemoteException {
