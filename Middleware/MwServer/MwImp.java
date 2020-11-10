@@ -761,9 +761,9 @@ public class MwImp implements MwInterface {
     public boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException {
         //TODO: Make this method only allow one to commit at a time  synchronize???
         if(tm.commit(xid)){
+            lm.UnlockAll(xid);
             return true;
         }
-        lm.UnlockAll(xid);
         //TODO: After all successful commit -> release the lock
         return false;
     }
@@ -772,6 +772,7 @@ public class MwImp implements MwInterface {
     public void abort(int xid) throws RemoteException, InvalidTransactionException {
         tm.abort(xid);
         lm.UnlockAll(xid);
+
     }
 
     @Override
