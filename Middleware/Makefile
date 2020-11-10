@@ -14,11 +14,11 @@ MwInterface.jar: MwServer/MwInterface.java
 	jar cvf MwInterface.jar MwServer/MwInterface.class Exceptions/*.class
 
 
-compile-server-rmi: CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java MwServer/*.java Common/*.java ResourceManager/*.java TransactionManager/*.java Exceptions/*.java
-	javac CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java MwServer/*.java Common/*.java ResourceManager/*.java TransactionManager/*.java Exceptions/*.java
+compile-server-rmi: CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java MwServer/*.java Common/*.java ResourceManager/*.java TransactionManager/*.java Exceptions/*.java LockManager/*.java
+	javac CarServer/*.java FlightServer/*.java RoomServer/*.java CustomerServer/*.java MwServer/*.java Common/*.java ResourceManager/*.java TransactionManager/*.java Exceptions/*.java LockManager/*.java
 
 
 clean:
-	rm -f CarServer/*.class FlightServer/*.class RoomServer/*.class CustomerServer/*.class MwServer/*.class Common/*.class ResourceManager/*.class TransactionManager/*.class Exceptions/*.class
+	rm -f CarServer/*.class FlightServer/*.class RoomServer/*.class CustomerServer/*.class MwServer/*.class Common/*.class ResourceManager/*.class TransactionManager/*.class Exceptions/*.class LockManager/*.class
 	rm -f MwInterface.jar
 	rm -f java.policy
