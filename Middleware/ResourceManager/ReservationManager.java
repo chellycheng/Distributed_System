@@ -17,9 +17,11 @@ public abstract class ReservationManager<T extends RMItem> {
 
     public boolean commit(int xid) throws RemoteException{
         try{
-            synchronized (resource_buffer){
-                resource_buffer.remove(xid);
-            }
+            //if other resource manager fail then we need the transaction to abort.
+            //we can only delete the transaction after server confirm all successfully commit
+//            synchronized (resource_buffer){
+//                resource_buffer.remove(xid);
+//            }
             return true;
         }
         catch(Exception e){
@@ -32,6 +34,7 @@ public abstract class ReservationManager<T extends RMItem> {
             synchronized (resource_buffer){
                 RMHashMap rhm =  resource_buffer.get(xid);
                 if(rhm == null){
+                    //no operation has been down
                     return;
                 }
                 if(!rhm.isEmpty()) {
@@ -45,7 +48,6 @@ public abstract class ReservationManager<T extends RMItem> {
                         else{
                             writeData(xid, key, value);
                         }
-
                     }
                 }
             }

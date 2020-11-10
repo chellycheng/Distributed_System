@@ -10,7 +10,7 @@ import ResourceManager.ResourceManager;
 public class TransactionManager {
 
     // TIMEOUT
-    public static final long TRANSACTION_TIMEOUT = 1000;
+    public static final long TRANSACTION_TIMEOUT = 1000000;
 
     private int tid;
     private Hashtable<Integer, Transaction> transactions;
@@ -42,11 +42,6 @@ public class TransactionManager {
             throw new InvalidTransactionException(transactionId," Non-exist or not active");
         }
         Transaction t = transactions.get(transactionId);
-
-        if (t.status != TransactionStatus.ACTIVE) {
-            throw new InvalidTransactionException(
-                    transactionId, "Cannot commit this transaction (status: " + t.status + ").");
-        }
         Trace.info("Transaction Manger: Commit starts");
         t.status = TransactionStatus.IN_COMMIT;
         boolean success = true;
@@ -56,7 +51,7 @@ public class TransactionManager {
             success &= rm.commit(transactionId);
         }
         if(!success){
-            //TODO: commit failure
+            abort(transactionId);
             throw new TransactionAbortedException(transactionId, "Aborted");
         }
         t.status = TransactionStatus.COMMITTED;
@@ -65,25 +60,22 @@ public class TransactionManager {
 
     public void abort(int transactionId) throws RemoteException,
             InvalidTransactionException{
-        if(!transactions.containsKey(transactionId)){
-            throw new InvalidTransactionException(transactionId," Non exist");
+        if(!verifyTransactionId(transactionId)){
+            throw new InvalidTransactionException(transactionId," Non-exist or not active");
         }
         else{
             Transaction t = transactions.get(transactionId);
-            if(t.status != TransactionStatus.ACTIVE){
-                throw new InvalidTransactionException(transactionId, "now status-"+ t.status);
-            }
             t.status = TransactionStatus.IN_ABORT;
-            for(ResourceManager rm: mapping.values()){
-                Trace.info("Transaction Manger: Shutdown is running for"+ rm.getName());
+            for(String rm_name : t.rms){
+                ResourceManager rm = mapping.get(rm_name);
+                Trace.info("Transaction Manger: Abort is running for"+ rm.getName());
                 rm.abort(transactionId);
                 Trace.info("Transaction Manger: Abort successfully.");
             }
             t.status = TransactionStatus.ABORTED;
         }
-
-
     }
+
     public boolean shutdown() throws RemoteException{
         for(Transaction t: transactions.values()){
             if(t.status == TransactionStatus.ACTIVE || t.status == TransactionStatus.IN_COMMIT || t.status == TransactionStatus.IN_ABORT){
@@ -127,7 +119,7 @@ public class TransactionManager {
             return false;
         }
     }
-    //TOOD: purge somewhere
+    //TODO: purge somewhere
     public void resetTimeout(int xid) {
         if (verifyTransactionId(xid)) {
             // Cancel the previous timer
@@ -146,7 +138,7 @@ public class TransactionManager {
                                 abort(xid);
                             }
                             else{
-                                Trace.info("Timer is useless "+ xid);
+                                Trace.info("Remove the Timer "+ xid);
                                 timers.remove(timer);
                             }
                         } catch (Exception e) {
@@ -157,19 +149,6 @@ public class TransactionManager {
 
                 timers.put(xid, timer);
         }
-    }
-
-    private boolean selfDestroy(int status) {
-
-        Timer shutdownTimer = new Timer();
-        shutdownTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                System.exit(status);
-            }
-        }, 1000);
-
-        return true;
     }
 
 }
