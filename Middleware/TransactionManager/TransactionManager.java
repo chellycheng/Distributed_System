@@ -10,7 +10,7 @@ import ResourceManager.ResourceManager;
 public class TransactionManager {
 
     // TIMEOUT
-    public static final long TRANSACTION_TIMEOUT = 1000000;
+    public static final long TRANSACTION_TIMEOUT = 1000;
 
     private int tid;
     private Hashtable<Integer, Transaction> transactions;
@@ -38,8 +38,8 @@ public class TransactionManager {
 
     public boolean commit(int transactionId)
             throws RemoteException,TransactionAbortedException, InvalidTransactionException{
-        if(!transactions.containsKey(transactionId)){
-            throw new InvalidTransactionException(transactionId," Non-exist");
+        if(!verifyTransactionId(transactionId)){
+            throw new InvalidTransactionException(transactionId," Non-exist or not active");
         }
         Transaction t = transactions.get(transactionId);
 
@@ -118,6 +118,9 @@ public class TransactionManager {
 
     public boolean verifyTransactionId(int xid){
         if(transactions.containsKey(xid)){
+            if(transactions.get(xid).status != TransactionStatus.ACTIVE){
+                return false;
+            }
             return true;
         }
         else{

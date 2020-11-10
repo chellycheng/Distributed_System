@@ -127,8 +127,6 @@ public class MwImp implements MwInterface {
 
     }
 
-    //TODO: A function to reconnect, operation timeout
-    //TODO: Abort handling
     @Override
     public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,InvalidTransactionException {
         //Using this function as example for D2
@@ -136,7 +134,7 @@ public class MwImp implements MwInterface {
         //TODO: Query the parameter
         //TODO: track of related manager
         if(!tm.verifyTransactionId(xid)){
-            throw new InvalidTransactionException(xid, "Non-exist");
+            throw new InvalidTransactionException(xid, "Non-exist or non active");
         }
         tm.enlist(xid, fm);
 
