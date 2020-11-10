@@ -46,7 +46,7 @@ public class LockManager
 			BitSet bConvert = new BitSet(1);
 			while (bConflict) {
 				synchronized (this.lockTable) {
-					// Check if this lock request conflicts with existing locks
+						// Check if this lock request conflicts with existing locks
 					bConflict = LockConflict(dataLockObject, bConvert);
 					if (!bConflict) {
 						// No lock conflict
@@ -138,6 +138,7 @@ public class LockManager
 						{
 							if (j == 0)
 							{
+
 								// Get all other transactions which have locks on the
 								// data item just unlocked
 								Vector vect1 = this.lockTable.elements(dataLockObject);
@@ -210,6 +211,7 @@ public class LockManager
 		Vector vect = this.lockTable.elements(dataLockObject);
 		int size = vect.size();
 
+
 		// As soon as a lock that conflicts with the current lock request is found, return true
 		for (int i = 0; i < size; i++)
 		{
@@ -240,14 +242,17 @@ public class LockManager
 					}
 					if (l_dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_READ){
 						//only this transaction has read lock on the dataobject,
-						if(size == 1){
-							bitset.set(0);
-							return false;
+						WaitLockObject  wo = new WaitLockObject(dataLockObject.getXId(), dataLockObject.getDataName(), dataLockObject.getLockType());
+						Vector queryW = this.waitTable.elements(wo);
+
+						if(size ==1){
+							if(queryW.size()==0){
+								bitset.set((0));
+								return false;
+							}
 						}
-						//if some other transactions have lock on the dataobjectm, there is a conflict so return true
-						if(size>1){
-							return true;
-						}
+						return true;
+
 					}
 				}
 			} 

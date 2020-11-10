@@ -218,17 +218,20 @@ public class MwImp implements MwInterface {
 
     @Override
     public boolean deleteCars(int xid, String location) throws RemoteException,InvalidTransactionException {
+        lock( xid, location, READ);
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
         tm.enlist(xid, cm);
 
+        lock(xid, location, Write)
         try{
             return cm.deleteCars(xid, location);
         }
         catch (Exception e){
             throw new RemoteException("Fail to delete car");
         }
+        unlockall( xid)
     }
 
     @Override
