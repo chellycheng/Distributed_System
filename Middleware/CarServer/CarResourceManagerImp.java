@@ -67,12 +67,15 @@ public class CarResourceManagerImp extends ReservationManager<Car>  implements C
         {
             // Car location doesn't exist yet, add it
             Car newObj = new Car(location, count, price);
+            //LOG
+            enlist(xid, newObj.getKey(), null);
             writeData(xid, newObj.getKey(), newObj);
             Trace.info("CarRM::addCars(" + xid + ") created new location " + location + ", count=" + count + ", price=$" + price);
         }
         else
         {
             // Add count to existing car location and update price if greater than zero
+            enlist(xid, curObj.getKey(), (RMItem) curObj.clone());
             curObj.setCount(curObj.getCount() + count);
             if (price > 0)
             {
@@ -141,6 +144,7 @@ public class CarResourceManagerImp extends ReservationManager<Car>  implements C
             return false;
         }else{
             // Decrease the number of available items in the storage
+            enlist(xid, key, (RMItem) item.clone());
             Trace.warn("CarRM::reserveCar(Current Count: " + item.getCount());
             item.setCount(item.getCount() - 1);
             item.setReserved(item.getReserved() + 1);
@@ -158,66 +162,14 @@ public class CarResourceManagerImp extends ReservationManager<Car>  implements C
         return car_name;
     }
 
-    protected RMItem readData(int xid, String key)
-    {
-        synchronized(car_data) {
-            RMItem item = car_data.get(key);
-            if (item != null) {
-                return (RMItem)item.clone();
-            }
-            return null;
-        }
-    }
-
-    // Writes a data item
-    protected void writeData(int xid, String key, RMItem value)
-    {
-        synchronized(car_data) {
-            car_data.put(key, value);
-        }
-    }
-
-    // Remove the item out of storage
-    protected void removeData(int xid, String key)
-    {
-        synchronized(car_data) {
-            car_data.remove(key);
-        }
-    }
-
-    // Deletes the encar item
-    protected boolean deleteItem(int xid, String key)
-    {
-        Trace.info("CarRM::deleteItem(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        // Check if there is such an item in the storage
-        if (curObj == null)
-        {
-            Trace.warn("CarRM::deleteItem(" + xid + ", " + key + ") failed--item doesn't exist");
-            return false;
-        }
-        else
-        {
-            if (curObj.getReserved() == 0)
-            {
-                removeData(xid, curObj.getKey());
-                Trace.info("CarRM::deleteItem(" + xid + ", " + key + ") item deleted");
-                return true;
-            }
-            else
-            {
-                Trace.info("CarRM::deleteItem(" + xid + ", " + key + ") item can't be deleted because some customers have reserved it");
-                return false;
-            }
-        }
-    }
-
     @Override
     public boolean reserve_cancel(int xid, int customerID, int count, String location) throws RemoteException {
 
         try {
             Trace.info("CarRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + location + " " + count + " times");
             Car item = (Car) readData(xid, location);
+            //LOG
+            enlist(xid, location, (RMItem) item.clone());
             Trace.info("CarRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + location + " which is reserved " + item.getReserved() + " times and is still available " + item.getCount() + " times");
             item.setReserved(item.getReserved() - count);
             item.setCount(item.getCount() + count);
@@ -229,43 +181,6 @@ public class CarResourceManagerImp extends ReservationManager<Car>  implements C
             Trace.info("CarRM::reserve_cancel(" + xid + ", Error when process" + customerID + ") with reservations on " + location );
             return false;
         }
-    }
-    // Query the number of available seats/rooms/cars
-    protected int queryNum(int xid, String key)
-    {
-        Trace.info("CarRM::queryNum(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        int value = 0;
-        if (curObj != null)
-        {
-            value = curObj.getCount();
-        }
-        Trace.info("CarRM::queryNum(" + xid + ", " + key + ") returns count=" + value);
-        return value;
-    }
-
-    // Query the price of an item
-    protected int queryPrice(int xid, String key)
-    {
-        Trace.info("CarRM::queryPrice(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        int value = 0;
-        if (curObj != null)
-        {
-            value = curObj.getPrice();
-        }
-        Trace.info("CarRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
-        return value;
-    }
-
-    @Override
-    public boolean commit(int xid) throws RemoteException {
-        return false;
-    }
-
-    @Override
-    public void abort(int xid) throws RemoteException {
-
     }
 
     @Override

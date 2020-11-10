@@ -1,11 +1,9 @@
 package ResourceManager;
 import Common.*;
-import FlightServer.Flight;
 
 import java.rmi.RemoteException;
 import java.util.Hashtable;
 import java.util.Map.*;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -99,10 +97,9 @@ public abstract class ReservationManager<T extends RMItem> {
         }
     }
 
-    // Deletes the flight item
     protected boolean deleteItem(int xid, String key)
     {
-        Trace.info("FlightRM::deleteItem(" + xid + ", " + key + ") called");
+        Trace.info("RM::deleteItem(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         // Check if there is such an item in the storage
         if (curObj == null)
@@ -133,21 +130,21 @@ public abstract class ReservationManager<T extends RMItem> {
         {
             value = curObj.getCount();
         }
-        Trace.info("FlightRM::queryNum(" + xid + ", " + key + ") returns count=" + value);
+        Trace.info("RM::queryNum(" + xid + ", " + key + ") returns count=" + value);
         return value;
     }
 
     // Query the price of an item
     protected int queryPrice(int xid, String key)
     {
-        Trace.info("FlightRM::queryPrice(" + xid + ", " + key + ") called");
+        Trace.info("RM::queryPrice(" + xid + ", " + key + ") called");
         ReservableItem curObj = (ReservableItem)readData(xid, key);
         int value = 0;
         if (curObj != null)
         {
             value = curObj.getPrice();
         }
-        Trace.info("FlightRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
+        Trace.info("RM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
         return value;
     }
 
