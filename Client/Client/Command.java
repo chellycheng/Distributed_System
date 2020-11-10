@@ -37,8 +37,6 @@ public enum Command {
 	Abort("Abort a given transaction", "<xid>"),
 	Shutdown("Shutdown all servers","");
 
-
-
 	String m_description;
 	String m_args;
 

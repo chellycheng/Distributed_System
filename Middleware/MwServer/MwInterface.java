@@ -3,7 +3,7 @@ package MwServer;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.*;
-import Exception.*;
+import Exceptions.*;
 
 public interface MwInterface extends Remote{
 

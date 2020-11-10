@@ -8,8 +8,9 @@ java.policy: FORCE
 
 FORCE: ;
 
-../Middleware/MwInterface.jar: ../Middleware/MwServer/MwInterface.java
-	make -C ../Server/ MwInterface.jar
+../Middleware/MwInterface.jar: ../Middleware/MwServer/MwInterface.java ../Middleware/Exceptions/*.java
+	make -C ../Middleware/ MwInterface.jar
+
 
 compile-client: ../Middleware/MwInterface.jar
 	javac -cp ../Middleware/MwInterface.jar Client/*.java

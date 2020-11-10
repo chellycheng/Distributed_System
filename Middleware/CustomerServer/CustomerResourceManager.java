@@ -1,9 +1,10 @@
 package CustomerServer;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import ResourceManager.*;
 import java.util.Vector;
 
-public interface CustomerResourceManager extends ResourceManager{
+public interface CustomerResourceManager extends ResourceManager {
 
     /**
      * Add customer.

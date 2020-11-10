@@ -1,5 +1,4 @@
 package MwServer;
-import MwServer.MwInterface;
 import Common.*;
 import CustomerServer.*;
 import CarServer.CarResourceManager;
@@ -13,8 +12,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import java.util.Vector;
 import ResourceManager.*;
-import TransanctionManager.TransactionManager;
-import Exception.*;
+import TransactionManager.TransactionManager;
+import Exceptions.*;
 
 
 public class MwImp implements MwInterface {
@@ -34,7 +33,7 @@ public class MwImp implements MwInterface {
 
     //Transaction Manager components
     private TransactionManager tm;
-    public Hashtable<String, ResourceManager> mapping;
+
 
 
     public static void main(String[] args) throws Exception{
@@ -81,6 +80,7 @@ public class MwImp implements MwInterface {
             System.setSecurityManager(new SecurityManager());
         }
     }
+
     public MwImp( String cm_host, String fm_host, String rm_host){
 
         //connect to the remote server resource
@@ -99,10 +99,7 @@ public class MwImp implements MwInterface {
         this.ctm = new CustomerResourceManagerImp();
 
         //Transaction Manager components
-        tm = new TransactionManager(this);
-        mapping.put("Car_server", this.cm);
-        mapping.put("Room_server", this.rm);
-        mapping.put("Flight_server", this.fm);
+        tm = new TransactionManager(cm, rm, fm, ctm);
 
         //TODO: Initialize the lock manager
 
@@ -130,8 +127,6 @@ public class MwImp implements MwInterface {
 
     }
 
-    //TODO: A function to reconnect, operation timeout
-    //TODO: Abort handling
     @Override
     public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,InvalidTransactionException {
         //Using this function as example for D2
@@ -139,7 +134,7 @@ public class MwImp implements MwInterface {
         //TODO: Query the parameter
         //TODO: track of related manager
         if(!tm.verifyTransactionId(xid)){
-            throw new InvalidTransactionException(xid, "Non-exist");
+            throw new InvalidTransactionException(xid, "Non-exist or non active");
         }
         tm.enlist(xid, fm);
 
@@ -267,17 +262,13 @@ public class MwImp implements MwInterface {
                 String bill = ctm.queryCustomerInfo(xid,customerID);
                 // Increase the reserved numbers of all reservable items which the customer reserved.
                 String [] reservations = bill.split("\n");
-                Trace.info("TEST-reservation:: " + reservations[0]);
                 for(int i=1; i<reservations.length; i++){
                     String[] temp = reservations[i].split(" ");
                     int count = Integer.parseInt(temp[0]);
                     String key = temp[1];
 
                     String[] key_component = key.split("-");
-                    Trace.info("TEST-var1:: " + temp[0]);
-                    Trace.info("TEST-var2:: " + temp[1]);
                     String resourceName = key_component[0];
-                    Trace.info("TEST-resourceName:: " + resourceName);
                     try{
                         switch (resourceName){
                             case "flight":
@@ -408,7 +399,6 @@ public class MwImp implements MwInterface {
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
-        tm.enlist(xid, fm);
         try{
             int price = -1;
             String key = "flight-" + flightNum;
@@ -416,6 +406,9 @@ public class MwImp implements MwInterface {
             try{
                 //if the flight is available
                 if(fm.reserve_check(xid, flightNum) && ctm.reserve_item(xid, customerID)){
+                    //LOG
+                    tm.enlist(xid, fm);
+                    tm.enlist(xid, ctm);
                     price = fm.queryFlightPrice(xid, flightNum);
                 }
                 else{
@@ -438,7 +431,7 @@ public class MwImp implements MwInterface {
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
-        tm.enlist(xid, cm);
+
         try{
             int price = -1;
             String key = "car-" + location;
@@ -446,6 +439,9 @@ public class MwImp implements MwInterface {
             try{
                 //if the flight is available
                 if(cm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
+                    //LOG
+                    tm.enlist(xid, cm);
+                    tm.enlist(xid, ctm);
                     price = cm.queryCarsPrice(xid, location);
                 }
                 else{
@@ -469,7 +465,6 @@ public class MwImp implements MwInterface {
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
-        tm.enlist(xid, rm);
         try{
             int price = -1;
             String key = "room-" + location;
@@ -477,6 +472,9 @@ public class MwImp implements MwInterface {
             try{
                 //if the flight is available
                 if(rm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
+                    //LOG
+                    tm.enlist(xid, rm);
+                    tm.enlist(xid, ctm);
                     price = rm.queryRoomsPrice(xid, location);
                 }
                 else{
@@ -501,8 +499,6 @@ public class MwImp implements MwInterface {
             throw new InvalidTransactionException(xid, "Non-exist");
         }
 
-        Trace.info("TEST-car_in: " + car);
-        Trace.info("TEST-room_in: " + room);
         boolean room_success = room && rm.reserve_check(xid, location);
         boolean car_success = car && cm.reserve_check(xid, location);
         for (String flightnumstring : flightNumbers) {
@@ -512,6 +508,10 @@ public class MwImp implements MwInterface {
                 return false;
             }
         }
+        //LOG
+        tm.enlist(xid, ctm);
+        tm.enlist(xid, fm);
+
         boolean client_success = ctm.reserve_item(xid,customerId);
         Trace.info("TEST-room: " + room_success);
         Trace.info("TEST-car: " + car_success);
@@ -521,6 +521,9 @@ public class MwImp implements MwInterface {
 
             try {
                 if (room) {
+                    //LOG
+                    tm.enlist(xid, rm);
+
                     String room_key = "room-" + location;
                     room_key = room_key.toLowerCase();
                     int room_price = rm.queryRoomsPrice(xid, location);
@@ -537,6 +540,9 @@ public class MwImp implements MwInterface {
                 String car_key = "car-" + location;
                 car_key = car_key.toLowerCase();
                 if (car) {
+                    //LOG
+                    tm.enlist(xid, cm);
+
                     int car_price = cm.queryCarsPrice(xid, location);
                     cm.reserveCar(xid, location);
                     ctm.reserveCar(xid, customerId, car_key, location, car_price);
@@ -573,7 +579,7 @@ public class MwImp implements MwInterface {
         return "group_18_" + s_serverName;
     }
 
-    //TODO: Overall todo, implmeneted the timeout stragegy
+    //TODO: Overall todo, implemeneted the timeout stragegy
 
     @Override
     public int start() throws RemoteException {
@@ -586,7 +592,7 @@ public class MwImp implements MwInterface {
         if(tm.commit(xid)){
             return true;
         }
-        //TODO: After all sucessful commit -> release the lock
+        //TODO: After all successful commit -> release the lock
         return false;
     }
 

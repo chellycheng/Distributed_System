@@ -10,10 +10,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Vector;
-
+import ResourceManager.ReservationManager;
 import java.rmi.RemoteException;
 
-public class RoomResourceManagerImp implements RoomResourceManager {
+public class RoomResourceManagerImp extends ReservationManager<Room> implements RoomResourceManager {
 
     protected String room_name = "Room_server";
     protected RMHashMap room_data = new RMHashMap();
@@ -263,7 +263,6 @@ public class RoomResourceManagerImp implements RoomResourceManager {
 
     @Override
     public boolean shutdown() throws RemoteException {
-        System.exit(0);
-        return true;
+        return selfDestroy(0);
     }
 }

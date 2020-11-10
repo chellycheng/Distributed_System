@@ -1,18 +1,17 @@
 package CustomerServer;
 
 import Common.*;
+import ResourceManager.ReservationManager;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Calendar;
-import java.util.Vector;
 
 import java.rmi.RemoteException;
 
-public class CustomerResourceManagerImp implements CustomerResourceManager {
-    protected String customer_name = "Customer_server/1018";
-    protected RMHashMap customer_data = new RMHashMap();
+public class CustomerResourceManagerImp extends ReservationManager<Customer> implements CustomerResourceManager {
+    protected String customer_name = "Customer_server";
 
     public static void main(String[] args) {
         //default port
@@ -62,6 +61,8 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
                 String.valueOf(Math.round(Math.random() * 100 + 1)));
         Customer customer = new Customer(cid);
         writeData(xid, customer.getKey(), customer);
+        //LOG
+        enlist(xid, customer.getKey(), null);
         Trace.info("CustomerRM::newCustomer(" + cid + ") returns ID=" + cid);
         return cid;
     }
@@ -75,6 +76,8 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
         {
             customer = new Customer(customerID);
             writeData(xid, customer.getKey(), customer);
+            //LOG
+            enlist(xid, customer.getKey(), null);
             Trace.info("CustomerRM::newCustomer(" + xid + ", " + customerID + ") created a new customer");
             return true;
         }
@@ -111,6 +114,8 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
         else
         {
             // Remove the customer from the storage
+            //LOG
+            enlist(xid,customer.getKey(), (RMItem) customer.clone());
             removeData(xid, customer.getKey());
             Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") succeeded");
             return true;
@@ -172,33 +177,6 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
         return customer_name;
     }
 
-    protected RMItem readData(int xid, String key)
-    {
-        synchronized(customer_data) {
-            RMItem item = customer_data.get(key);
-            if (item != null) {
-                return (RMItem)item.clone();
-            }
-            return null;
-        }
-    }
-
-    // Writes a data item
-    protected void writeData(int xid, String key, RMItem value)
-    {
-        synchronized(customer_data) {
-            customer_data.put(key, value);
-        }
-    }
-
-    // Remove the item out of storage
-    protected void removeData(int xid, String key)
-    {
-        synchronized(customer_data) {
-            customer_data.remove(key);
-        }
-    }
-
     // Reserve an item
     protected boolean reserveItem(int xid, int customerID, String key, String location, int price)
     {
@@ -210,11 +188,16 @@ public class CustomerResourceManagerImp implements CustomerResourceManager {
             Trace.warn("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ")  failed--customer doesn't exist");
             return false;
         }
-
+        enlist(xid,customer.getKey(),(RMItem) customer.clone());
         customer.reserve(key, location, price);
         writeData(xid, customer.getKey(), customer);
         Trace.info("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ") succeeded");
         return true;
 
+    }
+
+    @Override
+    public boolean shutdown() throws RemoteException {
+        return selfDestroy(0);
     }
 }

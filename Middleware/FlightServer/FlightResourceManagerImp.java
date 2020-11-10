@@ -2,14 +2,19 @@
 package FlightServer;
 
 import Common.*;
+import CustomerServer.Customer;
+import ResourceManager.ReservationManager;
+
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import java.rmi.RemoteException;
 
-public class FlightResourceManagerImp implements FlightResourceManager {
+public class FlightResourceManagerImp extends ReservationManager<Flight> implements FlightResourceManager {
 
 
     protected String flight_name = "Flight_server";
@@ -63,6 +68,8 @@ public class FlightResourceManagerImp implements FlightResourceManager {
         {
             // Doesn't exist yet, add it
             Flight newObj = new Flight(flightNum, flightSeats, flightPrice);
+            //LOG
+            enlist(xid, newObj.getKey(), null);
             writeData(xid, newObj.getKey(), newObj);
             Trace.info("FlightRM::addFlight(" + xid + ") created new flight " + flightNum + ", seats=" + flightSeats + ", price=$" + flightPrice);
         }
@@ -74,16 +81,19 @@ public class FlightResourceManagerImp implements FlightResourceManager {
             {
                 curObj.setPrice(flightPrice);
             }
+            //LOG
+            enlist(xid, curObj.getKey(), null);
             writeData(xid, curObj.getKey(), curObj);
             Trace.info("FlightRM::addFlight(" + xid + ") modified existing flight " + flightNum + ", seats=" + curObj.getCount() + ", price=$" + flightPrice);
         }
+
         return true;
     }
 
     @Override
     public boolean deleteFlight(int xid, int flightNum) throws RemoteException
     {
-        Trace.info("FlightRM::deleteFlgihts(" + xid + ") delete a flight " + flightNum);
+        Trace.info("FlightRM::deleteFlights(" + xid + ") delete a flight " + flightNum);
         return deleteItem(xid, Flight.getKey(flightNum));
     }
 
@@ -123,12 +133,13 @@ public class FlightResourceManagerImp implements FlightResourceManager {
         try {
             Trace.info("FlightRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + key + " " + count + " times");
             Flight item = (Flight) readData(xid, key);
-            Trace.info("TEST-location::"+key);
             if (item == null)
             {
                 Trace.warn("FlightRM::reserve_cancel(" + xid +  ", " + key + ") failed--item doesn't exist");
                 return false;
             }
+            //LOG
+            enlist(xid, key, (RMItem) item.clone());
             Trace.info("FlightRM::reserve_cancel(" + xid + ", " + customerID + ") has reserved " + key + " which is reserved " + item.getReserved() + " times and is still available " + item.getCount() + " times");
             item.setReserved(item.getReserved() - count);
             item.setCount(item.getCount() + count);
@@ -158,6 +169,7 @@ public class FlightResourceManagerImp implements FlightResourceManager {
             return false;
         }else{
             // Decrease the number of available items in the storage
+            enlist(xid, key, (RMItem) item.clone());
             Trace.warn("FlightRM::reserveFlight(Current Count: " + item.getCount());
             item.setCount(item.getCount() - 1);
             item.setReserved(item.getReserved() + 1);
@@ -174,102 +186,11 @@ public class FlightResourceManagerImp implements FlightResourceManager {
         return flight_name;
     }
 
-
-    protected RMItem readData(int xid, String key)
-    {
-        synchronized(flight_data) {
-            RMItem item = flight_data.get(key);
-            if (item != null) {
-                return (RMItem)item.clone();
-            }
-            return null;
-        }
-    }
-
-    // Writes a data item
-    protected void writeData(int xid, String key, RMItem value)
-    {
-        synchronized(flight_data) {
-            flight_data.put(key, value);
-        }
-    }
-
-    // Remove the item out of storage
-    protected void removeData(int xid, String key)
-    {
-        synchronized(flight_data) {
-            flight_data.remove(key);
-        }
-    }
-
-    // Deletes the flight item
-    protected boolean deleteItem(int xid, String key)
-    {
-        Trace.info("FlightRM::deleteItem(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        // Check if there is such an item in the storage
-        if (curObj == null)
-        {
-            Trace.warn("FlightRM::deleteItem(" + xid + ", " + key + ") failed--item doesn't exist");
-            return false;
-        }
-        else
-        {
-            if (curObj.getReserved() == 0)
-            {
-                removeData(xid, curObj.getKey());
-                Trace.info("FlightRM::deleteItem(" + xid + ", " + key + ") item deleted");
-                return true;
-            }
-            else
-            {
-                Trace.info("FlightRM::deleteItem(" + xid + ", " + key + ") item can't be deleted because some customers have reserved it");
-                return false;
-            }
-        }
-    }
-
-    // Query the number of available seats/rooms/cars
-    protected int queryNum(int xid, String key)
-    {
-        Trace.info("FlightRM::queryNum(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        int value = 0;
-        if (curObj != null)
-        {
-            value = curObj.getCount();
-        }
-        Trace.info("FlightRM::queryNum(" + xid + ", " + key + ") returns count=" + value);
-        return value;
-    }
-
-    // Query the price of an item
-    protected int queryPrice(int xid, String key)
-    {
-        Trace.info("FlightRM::queryPrice(" + xid + ", " + key + ") called");
-        ReservableItem curObj = (ReservableItem)readData(xid, key);
-        int value = 0;
-        if (curObj != null)
-        {
-            value = curObj.getPrice();
-        }
-        Trace.info("FlightRM::queryPrice(" + xid + ", " + key + ") returns cost=$" + value);
-        return value;
-    }
-
-    @Override
-    public boolean commit(int xid) throws RemoteException {
-        return false;
-    }
-
-    @Override
-    public void abort(int xid) throws RemoteException {
-
-    }
-
     @Override
     public boolean shutdown() throws RemoteException {
-        System.exit(0);
-        return true;
+        return selfDestroy(0);
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package Exception;
+package Exceptions;
 
 public class InvalidTransactionException extends Exception {
     private int m_xid = 0;

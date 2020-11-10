@@ -1,4 +1,4 @@
-package Exception;
+package Exceptions;
 
 public class TransactionAbortedException extends Exception {
     private int m_xid = 0;
