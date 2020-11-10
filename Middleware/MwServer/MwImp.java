@@ -188,6 +188,7 @@ public class MwImp implements MwInterface {
             return rm.addRooms(xid, location, count, price);
         }
         catch (DeadlockException deadlockException){
+            Trace.info("here");
             tm.abort(xid);
             return false;
 

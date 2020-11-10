@@ -76,13 +76,13 @@ public class FlightResourceManagerImp extends ReservationManager<Flight> impleme
         else
         {
             // Add seats to existing flight and update the price if greater than zero
+            enlist(xid, curObj.getKey(), (RMItem) curObj.clone());
             curObj.setCount(curObj.getCount() + flightSeats);
             if (flightPrice > 0)
             {
                 curObj.setPrice(flightPrice);
             }
             //LOG
-            enlist(xid, curObj.getKey(), null);
             writeData(xid, curObj.getKey(), curObj);
             Trace.info("FlightRM::addFlight(" + xid + ") modified existing flight " + flightNum + ", seats=" + curObj.getCount() + ", price=$" + flightPrice);
         }
