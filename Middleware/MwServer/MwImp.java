@@ -149,7 +149,7 @@ public class MwImp implements MwInterface {
 
             return fm.addFlight(xid,flightNum,flightSeats,flightPrice);
         }catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -169,7 +169,7 @@ public class MwImp implements MwInterface {
             tm.enlist(xid, cm);
             return cm.addCars(xid, location, count, price);
         } catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
         }
         catch (Exception e){
@@ -188,8 +188,7 @@ public class MwImp implements MwInterface {
             return rm.addRooms(xid, location, count, price);
         }
         catch (DeadlockException deadlockException){
-            Trace.info("here");
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -224,7 +223,7 @@ public class MwImp implements MwInterface {
             return ctm.newCustomer(xid, cid);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -244,7 +243,7 @@ public class MwImp implements MwInterface {
             return fm.deleteFlight(xid, flightNum);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -265,7 +264,7 @@ public class MwImp implements MwInterface {
             return cm.deleteCars(xid, location);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -284,7 +283,7 @@ public class MwImp implements MwInterface {
             tm.enlist(xid, rm);
             return rm.deleteRooms(xid, location);
         }catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -329,7 +328,7 @@ public class MwImp implements MwInterface {
                                     break;
                             }
                         } catch (DeadlockException deadlockException){
-                            tm.abort(xid);
+                            abort(xid);
                             return false;
 
                         }
@@ -345,7 +344,7 @@ public class MwImp implements MwInterface {
 
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -366,7 +365,7 @@ public class MwImp implements MwInterface {
             return fm.queryFlight(xid, flightNum);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return -1;
 
         }
@@ -386,7 +385,7 @@ public class MwImp implements MwInterface {
             return cm.queryCars(xid, location);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return -1;
 
         }
@@ -406,7 +405,7 @@ public class MwImp implements MwInterface {
             return rm.queryRooms(xid, location);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return -1;
 
         }
@@ -426,7 +425,7 @@ public class MwImp implements MwInterface {
             return ctm.queryCustomerInfo(xid, customerID);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return "Fail to query customer";
 
         }
@@ -447,7 +446,7 @@ public class MwImp implements MwInterface {
             return fm.queryFlightPrice(xid, flightNum);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return -1;
 
         }
@@ -468,7 +467,7 @@ public class MwImp implements MwInterface {
             return cm.queryCarsPrice(xid, location);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return -1;
 
         }
@@ -488,7 +487,7 @@ public class MwImp implements MwInterface {
             return rm.queryRoomsPrice(xid, location);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return -1;
 
         }
@@ -522,7 +521,7 @@ public class MwImp implements MwInterface {
                 }
             }
             catch (DeadlockException deadlockException){
-                tm.abort(xid);
+                abort(xid);
                 return false;
 
             }
@@ -534,7 +533,7 @@ public class MwImp implements MwInterface {
             return fm.reserveFlight(xid, flightNum) && ctm.reserveFlight(xid, customerID, key, String.valueOf(flightNum), price);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
 
         }
@@ -553,10 +552,11 @@ public class MwImp implements MwInterface {
             int price = -1;
             String key = "car-" + location;
             key.toLowerCase();
+            lm.Lock(xid, "customer"+customerID, TransactionLockObject.LockType.LOCK_WRITE);
+            lm.Lock(xid,"car"+location, TransactionLockObject.LockType.LOCK_WRITE);
             try{
                 //if the flight is available
-                lm.Lock(xid, "customer"+customerID, TransactionLockObject.LockType.LOCK_READ);
-                lm.Lock(xid,"car"+location, TransactionLockObject.LockType.LOCK_READ);
+
                 if(cm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
                     //LOG
                     tm.enlist(xid, cm);
@@ -568,20 +568,15 @@ public class MwImp implements MwInterface {
                     return false;
                 }
             }
-            catch (DeadlockException deadlockException){
-                tm.abort(xid);
-                return false;
 
-            }
             catch(Exception e){
                 throw new RemoteException("Fail to access the info of car, or the client did not exist");
             }
-            lm.Lock(xid, "customer"+customerID, TransactionLockObject.LockType.LOCK_WRITE);
-            lm.Lock(xid,"car"+location, TransactionLockObject.LockType.LOCK_WRITE);
+
             return cm.reserveCar(xid, location) && ctm.reserveCar(xid, customerID, key, location, price);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
         }
         catch (Exception e){
@@ -614,7 +609,7 @@ public class MwImp implements MwInterface {
                 }
             }
             catch (DeadlockException deadlockException){
-                tm.abort(xid);
+                abort(xid);
                 return false;
             }
             catch(Exception e){
@@ -625,7 +620,7 @@ public class MwImp implements MwInterface {
             return rm.reserveRoom(xid, location) && ctm.reserveCar(xid, customerID, key, location, price);
         }
         catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
         }
         catch (Exception e){
@@ -679,7 +674,7 @@ public class MwImp implements MwInterface {
                     }
                 }
                 catch (DeadlockException deadlockException){
-                    tm.abort(xid);
+                    abort(xid);
                     return false;
                 }
                 catch (Exception e) {
@@ -704,7 +699,7 @@ public class MwImp implements MwInterface {
 
                 }
                 catch (DeadlockException deadlockException){
-                    tm.abort(xid);
+                    abort(xid);
                     return false;
                 }
                 catch (Exception e) {
@@ -725,7 +720,7 @@ public class MwImp implements MwInterface {
                     }
                 }
                 catch (DeadlockException deadlockException){
-                    tm.abort(xid);
+                    abort(xid);
                     return false;
                 }
                 catch (Exception e) {
@@ -736,7 +731,7 @@ public class MwImp implements MwInterface {
                 return false;
             }
         } catch (DeadlockException deadlockException){
-            tm.abort(xid);
+            abort(xid);
             return false;
         }
         catch (Exception e){
@@ -760,18 +755,31 @@ public class MwImp implements MwInterface {
     @Override
     public boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException {
         //TODO: Make this method only allow one to commit at a time  synchronize???
-        if(tm.commit(xid)){
+        try {
+            if (tm.commit(xid)) {
+                return true;
+            }
+
+            //TODO: After all successful commit -> release the lock
+            return false;
+        } catch (Exception e) {
             lm.UnlockAll(xid);
-            return true;
+            return false;
+        }finally {
+            lm.UnlockAll(xid);
         }
-        //TODO: After all successful commit -> release the lock
-        return false;
     }
 
     @Override
     public void abort(int xid) throws RemoteException, InvalidTransactionException {
-        tm.abort(xid);
-        lm.UnlockAll(xid);
+        try{
+            tm.abort(xid);
+        }
+        catch(Exception e){
+            lm.UnlockAll(xid);
+        }finally {
+            lm.UnlockAll(xid);
+        }
 
     }
 

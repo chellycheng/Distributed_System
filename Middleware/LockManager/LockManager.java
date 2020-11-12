@@ -1,7 +1,9 @@
 package LockManager;
 
 import Common.*;
+import TransactionManager.Transaction;
 
+import javax.xml.crypto.Data;
 import java.util.BitSet;
 import java.util.Vector;
 
@@ -18,6 +20,7 @@ public class LockManager
 	{
 		super();
 	}
+
 
 	public boolean Lock(int xid, String data, TransactionLockObject.LockType lockType) throws DeadlockException
 	{
