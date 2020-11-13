@@ -204,7 +204,9 @@ public class MwImp implements MwInterface {
         }
         tm.enlist(xid, ctm);
         try{
-            return ctm.newCustomer(xid);
+            int cid = ctm.newCustomer(xid);
+            lm.Lock(xid, "customer"+cid, TransactionLockObject.LockType.LOCK_WRITE);
+            return cid;
         }
         catch (Exception e){
             throw new RemoteException("Fail to call new customer1");
