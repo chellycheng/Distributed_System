@@ -93,5 +93,7 @@ public class RMIClient extends Client
 			System.exit(1);
 		}
 	}
+
+	
 }
 

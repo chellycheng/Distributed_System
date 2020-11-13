@@ -134,23 +134,36 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,InvalidTransactionException {
+    public long[] addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,InvalidTransactionException {
         //Using this function as example for D2
         //TODO: Get the lock
         //TODO: Query the parameter
         //TODO: track of related manager
+        long[] time = new long[5];//[received point, RM, LM, TM, sent point]
+        time[0] = System.currentTimeMillis();
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist or non active");
         }
 
         try{
-            lm.Lock(xid,"flight"+flightNum, TransactionLockObject.LockType.LOCK_WRITE );
+            lm.Lock(xid,"flight"+flightNum, TransactionLockObject.LockType.LOCK_WRITE);
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             tm.enlist(xid, fm);
-
-            return fm.addFlight(xid,flightNum,flightSeats,flightPrice);
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            fm.addFlight(xid,flightNum,flightSeats,flightPrice);
+            time[4] = System.currentTimeMillis();
+            time[1] = time[4] - p2;
+            return time;
         }catch (DeadlockException deadlockException){
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             abort(xid);
-            return false;
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            time[4] = System.currentTimeMillis();
+            return time;
 
         }
         catch (Exception e){
@@ -159,18 +172,32 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean addCars(int xid, String location, int count, int price) throws RemoteException,InvalidTransactionException {
+    public long[] addCars(int xid, String location, int count, int price) throws RemoteException,InvalidTransactionException {
+        long[] time = new long[5];//[received point, RM, LM, TM, sent point]
+        time[0] = System.currentTimeMillis();
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
 
         try{
             lm.Lock(xid, "car"+location, TransactionLockObject.LockType.LOCK_WRITE);
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             tm.enlist(xid, cm);
-            return cm.addCars(xid, location, count, price);
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            cm.addCars(xid, location, count, price);
+            time[4] = System.currentTimeMillis();
+            time[1] = time[4] - p2;
+            return time;
         } catch (DeadlockException deadlockException){
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             abort(xid);
-            return false;
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            time[4] = System.currentTimeMillis();
+            return time;
         }
         catch (Exception e){
             throw new RemoteException("Fail to add Car");
@@ -178,18 +205,32 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean addRooms(int xid, String location, int count, int price) throws RemoteException,InvalidTransactionException {
+    public long[] addRooms(int xid, String location, int count, int price) throws RemoteException,InvalidTransactionException {
+        long[] time = new long[5];//[received point, RM, LM, TM, sent point]
+        time[0] = System.currentTimeMillis();
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
         try{
             lm.Lock(xid, "room"+location, TransactionLockObject.LockType.LOCK_WRITE);
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             tm.enlist(xid, rm);
-            return rm.addRooms(xid, location, count, price);
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            rm.addRooms(xid, location, count, price);
+            time[4] = System.currentTimeMillis();
+            time[1] = time[4] - p2;
+            return time;
         }
         catch (DeadlockException deadlockException){
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             abort(xid);
-            return false;
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            time[4] = System.currentTimeMillis();
+            return time;
 
         }
         catch (Exception e){
@@ -204,9 +245,7 @@ public class MwImp implements MwInterface {
         }
         tm.enlist(xid, ctm);
         try{
-            int cid = ctm.newCustomer(xid);
-            lm.Lock(xid, "customer"+cid, TransactionLockObject.LockType.LOCK_WRITE);
-            return cid;
+            return ctm.newCustomer(xid);
         }
         catch (Exception e){
             throw new RemoteException("Fail to call new customer1");
@@ -214,20 +253,34 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean newCustomer(int xid, int cid) throws RemoteException,InvalidTransactionException {
+    public long[] newCustomer(int xid, int cid) throws RemoteException,InvalidTransactionException {
+        long[] time = new long[5];//[received point, RM, LM, TM, sent point]
+        time[0] = System.currentTimeMillis();
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
 
         try{
             lm.Lock(xid,"customer"+cid, TransactionLockObject.LockType.LOCK_WRITE);
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             tm.enlist(xid, ctm);
-            return ctm.newCustomer(xid, cid);
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            ctm.newCustomer(xid, cid);
+            time[4] = System.currentTimeMillis();
+            time[1] = time[4] - p2;
+            return time;
+
         }
         catch (DeadlockException deadlockException){
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             abort(xid);
-            return false;
-
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            time[4] = System.currentTimeMillis();
+            return time;
         }
         catch (Exception e){
             throw new RemoteException("Fail to call new customer2");
@@ -458,20 +511,33 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public int queryCarsPrice(int xid, String location) throws RemoteException,InvalidTransactionException {
+    public long[] queryCarsPrice(int xid, String location) throws RemoteException,InvalidTransactionException {
+        long[] time = new long[5];//[received point, RM, LM, TM, sent point]
+        time[0] = System.currentTimeMillis();
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
 
         try{
             lm.Lock(xid, "car"+location, TransactionLockObject.LockType.LOCK_READ);
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             tm.enlist(xid, cm);
-            return cm.queryCarsPrice(xid, location);
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            cm.queryCarsPrice(xid, location);
+            time[4] = System.currentTimeMillis();
+            time[1] = time[4] - p2;
+            return time;
         }
         catch (DeadlockException deadlockException){
+            long p1 = System.currentTimeMillis();
+            time[2] = p1 - time[0];
             abort(xid);
-            return -1;
-
+            long p2 = System.currentTimeMillis();
+            time[3] = p2 - p1;
+            time[4] = System.currentTimeMillis();
+            return time;
         }
         catch (Exception e){
             throw new RemoteException("Fail to query price of car");
@@ -545,7 +611,9 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean reserveCar(int xid, int customerID, String location) throws RemoteException,InvalidTransactionException {
+    public long[] reserveCar(int xid, int customerID, String location) throws RemoteException,InvalidTransactionException {
+        long[] time = new long[5];//[received point, RM, LM, TM, sent point]
+        time[0] = System.currentTimeMillis();
         if(!tm.verifyTransactionId(xid)){
             throw new InvalidTransactionException(xid, "Non-exist");
         }
@@ -554,32 +622,38 @@ public class MwImp implements MwInterface {
             int price = -1;
             String key = "car-" + location;
             key.toLowerCase();
-            lm.Lock(xid, "customer"+customerID, TransactionLockObject.LockType.LOCK_WRITE);
-            lm.Lock(xid,"car"+location, TransactionLockObject.LockType.LOCK_WRITE);
             try{
                 //if the flight is available
-
+                lm.Lock(xid, "customer"+customerID, TransactionLockObject.LockType.LOCK_READ);
+                lm.Lock(xid,"car"+location, TransactionLockObject.LockType.LOCK_READ);
+                long p1 = System.currentTimeMillis();
+                time[2] = p1 - time[0];
                 if(cm.reserve_check(xid, location)&& ctm.reserve_item(xid, customerID)){
                     //LOG
                     tm.enlist(xid, cm);
                     tm.enlist(xid, ctm);
-                    price = cm.queryCarsPrice(xid, location);
+                    long p2 = System.currentTimeMillis();
+                    time[3] = p2 - p1;
+                    cm.queryCarsPrice(xid, location);
+                    time[4] = System.currentTimeMillis();
+                    time[1] = time[4] - p2;
+                    return time;
                 }
                 else{
                     Trace.info("ReserveCar request is received, but failed due to lack of car or customer");
-                    return false;
+                    time[4] = System.currentTimeMillis();
+                    return time;
                 }
             }
+            catch (DeadlockException deadlockException){
+                abort(xid);
+                time[4] = System.currentTimeMillis();
+                return time;
 
+            }
             catch(Exception e){
                 throw new RemoteException("Fail to access the info of car, or the client did not exist");
             }
-
-            return cm.reserveCar(xid, location) && ctm.reserveCar(xid, customerID, key, location, price);
-        }
-        catch (DeadlockException deadlockException){
-            abort(xid);
-            return false;
         }
         catch (Exception e){
             throw new RemoteException("Fail to reserve for the car");
@@ -755,21 +829,21 @@ public class MwImp implements MwInterface {
     }
 
     @Override
-    public boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException {
+    public long[] commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException {
+        long[] time = new long[5];//[received point, RM, LM, TM, sent point]
         //TODO: Make this method only allow one to commit at a time  synchronize???
-        try {
-            if (tm.commit(xid)) {
-                return true;
-            }
-
-            //TODO: After all successful commit -> release the lock
-            return false;
-        } catch (Exception e) {
+        time[0] = System.currentTimeMillis();
+        if(tm.commit(xid)){
+            long p1 = System.currentTimeMillis();
+            time[3] = p1-time[0];
             lm.UnlockAll(xid);
-            return false;
-        }finally {
-            lm.UnlockAll(xid);
+            time[4] = System.currentTimeMillis();
+            time[2] = time[4] - p1;
+            return time;
         }
+        //TODO: After all successful commit -> release the lock
+        time[4] = System.currentTimeMillis();
+        return time;
     }
 
     @Override
@@ -779,10 +853,12 @@ public class MwImp implements MwInterface {
         }
         catch(Exception e){
             lm.UnlockAll(xid);
-        }finally {
-            lm.UnlockAll(xid);
-        }
 
+        }
+        finally{
+            lm.UnlockAll(xid);
+
+        }
     }
 
     @Override

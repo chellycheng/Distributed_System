@@ -11,15 +11,15 @@ public interface MwInterface extends Remote{
         Implemented the same interface as IResourceManager
         Let Client know what are the available method to call
      */
-    boolean addFlight(int var1, int var2, int var3, int var4) throws RemoteException,InvalidTransactionException;
+    long[] addFlight(int var1, int var2, int var3, int var4) throws RemoteException,InvalidTransactionException;
 
-    boolean addCars(int var1, String var2, int var3, int var4) throws RemoteException,InvalidTransactionException;
+    long[] addCars(int var1, String var2, int var3, int var4) throws RemoteException,InvalidTransactionException;
 
-    boolean addRooms(int var1, String var2, int var3, int var4) throws RemoteException,InvalidTransactionException;
+    long[] addRooms(int var1, String var2, int var3, int var4) throws RemoteException,InvalidTransactionException;
 
     int newCustomer(int var1) throws RemoteException,InvalidTransactionException;
 
-    boolean newCustomer(int var1, int var2) throws RemoteException,InvalidTransactionException;
+    long[] newCustomer(int var1, int var2) throws RemoteException,InvalidTransactionException;
 
     boolean deleteFlight(int var1, int var2) throws RemoteException,InvalidTransactionException;
 
@@ -39,13 +39,13 @@ public interface MwInterface extends Remote{
 
     int queryFlightPrice(int var1, int var2) throws RemoteException,InvalidTransactionException;
 
-    int queryCarsPrice(int var1, String var2) throws RemoteException,InvalidTransactionException;
+    long[] queryCarsPrice(int var1, String var2) throws RemoteException,InvalidTransactionException;
 
     int queryRoomsPrice(int var1, String var2) throws RemoteException,InvalidTransactionException;
 
     boolean reserveFlight(int var1, int var2, int var3) throws RemoteException,InvalidTransactionException;
 
-    boolean reserveCar(int var1, int var2, String var3) throws RemoteException,InvalidTransactionException;
+    long[] reserveCar(int var1, int var2, String var3) throws RemoteException,InvalidTransactionException;
 
     boolean reserveRoom(int var1, int var2, String var3) throws RemoteException,InvalidTransactionException;
 
@@ -55,7 +55,7 @@ public interface MwInterface extends Remote{
 
     int start() throws RemoteException,InvalidTransactionException;
 
-    boolean commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException;
+    long[] commit(int xid) throws RemoteException, TransactionAbortedException, InvalidTransactionException;
 
     void abort(int xid) throws RemoteException,InvalidTransactionException;
 

@@ -1,3 +1,3 @@
-grant codebase "file:/home/davidyc/Desktop/COMP512/Dist_Sys/Distributed_System/Client/" {
+grant codebase "file:/Users/jifengwang/Desktop/COMP512Proj2/Distributed_System-master/Client/" {
 permission java.security.AllPermission;
 };

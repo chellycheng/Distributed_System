@@ -99,11 +99,6 @@ public abstract class Client
 					int flightSeats = toInt(arguments.elementAt(3));
 					int flightPrice = toInt(arguments.elementAt(4));
 
-					if (m_resourceManager.addFlight(id, flightNum, flightSeats, flightPrice)) {
-						System.out.println("Flight added");
-					} else {
-						System.out.println("Flight could not be added");
-					}
 					break;
 				}
 				case AddCars: {
@@ -119,11 +114,6 @@ public abstract class Client
 					int numCars = toInt(arguments.elementAt(3));
 					int price = toInt(arguments.elementAt(4));
 
-					if (m_resourceManager.addCars(id, location, numCars, price)) {
-						System.out.println("Cars added");
-					} else {
-						System.out.println("Cars could not be added");
-					}
 					break;
 				}
 				case AddRooms: {
@@ -139,11 +129,6 @@ public abstract class Client
 					int numRooms = toInt(arguments.elementAt(3));
 					int price = toInt(arguments.elementAt(4));
 
-					if (m_resourceManager.addRooms(id, location, numRooms, price)) {
-						System.out.println("Rooms added");
-					} else {
-						System.out.println("Rooms could not be added");
-					}
 					break;
 				}
 				case AddCustomer: {
@@ -166,11 +151,6 @@ public abstract class Client
 					int id = toInt(arguments.elementAt(1));
 					int customerID = toInt(arguments.elementAt(2));
 
-					if (m_resourceManager.newCustomer(id, customerID)) {
-						System.out.println("Add customer ID: " + customerID);
-					} else {
-						System.out.println("Customer could not be added");
-					}
 					break;
 				}
 				case DeleteFlight: {
@@ -311,8 +291,7 @@ public abstract class Client
 					int id = toInt(arguments.elementAt(1));
 					String location = arguments.elementAt(2);
 
-					int price = m_resourceManager.queryCarsPrice(id, location);
-					System.out.println("Price of cars at this location: " + price);
+					System.out.println("Price of cars at this location: ");
 					break;
 				}
 				case QueryRoomsPrice: {
@@ -357,11 +336,6 @@ public abstract class Client
 					int customerID = toInt(arguments.elementAt(2));
 					String location = arguments.elementAt(3);
 
-					if (m_resourceManager.reserveCar(id, customerID, location)) {
-						System.out.println("Car Reserved");
-					} else {
-						System.out.println("Car could not be reserved");
-					}
 					break;
 				}
 				case ReserveRoom: {
@@ -431,12 +405,6 @@ public abstract class Client
 				case Commit: {
 					checkArgumentsCount(2, arguments.size());
 					int id = toInt(arguments.elementAt(1));
-					if (m_resourceManager.commit(id)) {
-						System.out.println("Transaction [x=id "+ id +"] successfully committed");
-					}
-					else{
-						System.out.println("Transaction [x=id "+ id +"] could not be committed");
-					}
 					break;
 				}
 				case Abort: {
